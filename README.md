@@ -10,15 +10,23 @@ You can find the subject [here](./.github/assets/subject.pdf).
 
 ### Installation
 
-...todo
+> Make sure to have [stack](https://docs.haskellstack.org/en/stable/install_and_upgrade/) installed
+
+```
+git clone git@github.com:EpitechPromo2025/B-FUN-500-PAR-5-2-glados-abdelkarim.bengrine.git
+```
 
 ### Quickstart
 
-...todo
+```
+make re
+```
 
 ### Usage
 
-...todo
+```
+./glados
+```
 
 ## Get involved
 
