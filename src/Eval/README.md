@@ -4,6 +4,13 @@
 data Ast = Integer Int | Symbol String | Boolean Bool | Call String [Ast] | Define [String] Ast
 ```
 
+Change AST string new_value
+
+(define a 1)
+(define a 2)
+
+
+
 The function translated :
 ```lisp
 (define (> a b)
