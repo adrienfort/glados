@@ -1,7 +1,7 @@
 # AST
 ```haskell
 -- data Ast = Integer Int | Symbol String | Boolean Bool | Call String [Ast]
-data Ast = Integer Int | Symbol String | Call String [Ast] | Define [String] Ast
+data Ast = Integer Int | Symbol String | Boolean Bool | Call String [Ast] | Define [String] Ast
 ```
 
 The function translated :
