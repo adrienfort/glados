@@ -1,8 +1,7 @@
 # AST
 ```haskell
 -- data Ast = Integer Int | Symbol String | Boolean Bool | Call String [Ast]
-data Ast = Integer Int | Symbol String | Boolean Bool | Call String [Ast] | Func String [String] Ast
-
+data Ast = Integer Int | Symbol String | Call String [Ast] | Define [String] Ast
 ```
 
 The function translated :
@@ -20,19 +19,16 @@ The function translated :
 Giving us :
 ```
 AST:
-    - Call(define):
-        - Call(>):
-            - Symbol(a)
-            - Symbol(b)
-        - Call(if):
-            - Call(eq?)
-                - Symbol(a)
-                - Symbol(b)
-            - Bolean(#f)
+    - Define [>, a, b]:
+        - Call (if):
+            - Call (eq?):
+                - Symbol (a)
+                - Symbol (b)
+            - Boolean(#f == 0)
             - Call (if):
-                - Call(<):
-                    - Symbol(a)
-                    - Symbol(b)
-                - Bolean(#t)
-                - Bolean(#t)
+                - Call (<):
+                    - Symbol (a)
+                    - Symbol (b)
+                - Boolean (#f == 0)
+                - Boolean (#t == 1)
 ```
