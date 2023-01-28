@@ -1,4 +1,4 @@
-module Cpt where 
+module CPT.Cpt where
 
 data Cpt = Integer Int 
         |   Symbols String
