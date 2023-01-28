@@ -56,8 +56,8 @@ parseUInt = Parser $ \ s -> case runParser (parseSome (parseAnyChar [ '0' .. '9'
                             Nothing -> Nothing
 
 parseInt :: Parser Int
-parseInt = Parser $ \ s -> case runParser (parseChar '-') s of
-                            Just (_, s') -> case runParser parseUInt s' of
-                                            Just (a, s'') -> Just (-a, s'')
+parseInt = Parser $ \ s -> case runParser (parserOr (parseChar '-') (parseChar '+')) s of
+                            Just (c, s') -> case runParser parseUInt s' of
+                                            Just (i, s'') -> Just (if c == '-' then -i else i, s'')
                                             Nothing -> Nothing
                             Nothing -> runParser parseUInt s
