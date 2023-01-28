@@ -14,14 +14,14 @@ parserAnyCharFails = TestCase $ assertEqual "parserAnyCharFails" Nothing (runPar
 parserAnyCharSucceeds :: Test
 parserAnyCharSucceeds = TestCase $ assertEqual "parserAnyCharSucceeds" (Just ('a', "bc")) (runParser (parseAnyChar "abc") "abc")
 
-parserOrSucceeds :: Test
-parserOrSucceeds = TestCase $ assertEqual "parserOrTest" (Just ('a', "bcd")) (runParser (parserOr (parseChar 'a') (parseChar 'b')) "abcd")
+parseOrSucceeds :: Test
+parseOrSucceeds = TestCase $ assertEqual "parseOrTest" (Just ('a', "bcd")) (runParser (parseOr (parseChar 'a') (parseChar 'b')) "abcd")
 
-parserOrFails :: Test
-parserOrFails = TestCase $ assertEqual "parserOrFails" Nothing (runParser (parserOr (parseChar 'a') (parseChar 'b')) "cde")
+parseOrFails :: Test
+parseOrFails = TestCase $ assertEqual "parseOrFails" Nothing (runParser (parseOr (parseChar 'a') (parseChar 'b')) "cde")
 
-parserOrSucceeds2 :: Test
-parserOrSucceeds2 = TestCase $ assertEqual "parserOrSucceeds2" (Just ('b', "cda")) (runParser (parserOr (parseChar 'a') (parseChar 'b')) "bcda")
+parseOrSucceeds2 :: Test
+parseOrSucceeds2 = TestCase $ assertEqual "parseOrSucceeds2" (Just ('b', "cda")) (runParser (parseOr (parseChar 'a') (parseChar 'b')) "bcda")
 
 parseAndSucceeds :: Test
 parseAndSucceeds = TestCase $ assertEqual "parseAndSucceeds" (Just (('a', 'b'), "cd")) (runParser (parseAnd (parseChar 'a') (parseChar 'b')) "abcd")
@@ -110,9 +110,9 @@ parserListTest =
       parseCharSucceeds,
       parserAnyCharFails,
       parserAnyCharSucceeds,
-      parserOrSucceeds,
-      parserOrFails,
-      parserOrSucceeds2,
+      parseOrSucceeds,
+      parseOrFails,
+      parseOrSucceeds2,
       parseAndSucceeds,
       parseAndSuccess2,
       parseAndSuccess3,

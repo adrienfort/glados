@@ -17,8 +17,8 @@ parseAnyChar (a:ax) = Parser $ \ input -> case input of
     (_:_) -> runParser (parseAnyChar ax) input
     [] -> Nothing
 
-parserOr :: Parser a -> Parser a -> Parser a
-parserOr p1 p2 = Parser $ \ s -> case runParser p1 s of
+parseOr :: Parser a -> Parser a -> Parser a
+parseOr p1 p2 = Parser $ \ s -> case runParser p1 s of
                     Just (a, s') -> Just (a, s')
                     Nothing -> runParser p2 s
 
@@ -56,7 +56,7 @@ parseUInt = Parser $ \ s -> case runParser (parseSome (parseAnyChar [ '0' .. '9'
                             Nothing -> Nothing
 
 parseInt :: Parser Int
-parseInt = Parser $ \ s -> case runParser (parserOr (parseChar '-') (parseChar '+')) s of
+parseInt = Parser $ \ s -> case runParser (parseOr (parseChar '-') (parseChar '+')) s of
                             Just (c, s') -> case runParser parseUInt s' of
                                             Just (i, s'') -> Just (if c == '-' then -i else i, s'')
                                             Nothing -> Nothing
