@@ -103,6 +103,16 @@ parseIntSucceeds6 = TestCase $ assertEqual "parseIntSucceeeds6" (Just (42, "foob
 parseIntSucceeds7 :: Test
 parseIntSucceeds7 = TestCase $ assertEqual "parseIntSucceeeds7" (Just (-42, "foobar")) (runParser parseInt "-42foobar")
 
+-- parsePair parseInt "(123 456)foo bar"
+parsePairSucceeds :: Test
+parsePairSucceeds = TestCase $ assertEqual "parsePairSucceeds" (Just ((123, 456), "foo bar")) (runParser (parsePair parseInt) "(123 456)foo bar")
+
+parsePairSucceeds2 :: Test
+parsePairSucceeds2 = TestCase $ assertEqual "parsePairSucceeds2" Nothing (runParser (parsePair parseInt) "(123 456foo bar")
+
+parsePairSucceeds3 :: Test
+parsePairSucceeds3 = TestCase $ assertEqual "parsePairSucceeds3" (Just ((123,456),"foo bar")) (runParser (parsePair parseInt) "(123 456)foo bar")
+
 parserListTest :: Test
 parserListTest =
   TestList
@@ -138,5 +148,8 @@ parserListTest =
       parseIntSucceeds4,
       parseIntSucceeds5,
       parseIntSucceeds6,
-      parseIntSucceeds7
+      parseIntSucceeds7,
+      parsePairSucceeds,
+      parsePairSucceeds2,
+      parsePairSucceeds3
     ]

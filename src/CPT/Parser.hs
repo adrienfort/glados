@@ -61,3 +61,24 @@ parseInt = Parser $ \ s -> case runParser (parseOr (parseChar '-') (parseChar '+
                                             Just (i, s'') -> Just (if c == '-' then -i else i, s'')
                                             Nothing -> Nothing
                             Nothing -> runParser parseUInt s
+
+parsePair :: Parser a -> Parser (a , a) -- parse a pair as a tuple
+parsePair p = Parser $ \ s -> case runParser (parseAndWith (,) (parseChar '(') (parseAndWith (,) p (parseAndWith (,) (parseChar ' ') p))) s of
+                Just ((_, (a, (_, b))), (')':s')) -> Just ((a, b), s')
+                _ -> Nothing
+
+--parseList :: Parser a -> Parser [a]
+--parseList p s = case parseChar '(' s of
+--                Just (_, s') -> parseList' p [] s'
+--                Nothing -> Nothing
+--    where
+--        parseList' :: Parser a -> [a] -> String -> (Maybe ([a], String))
+--        parseList' p acc s = case p s of
+--                                Just (x, s') -> case parseChar ' ' s' of
+--                                                Just (_, s'') -> parseList' p (acc ++ [x]) (dropWhile (== ' ') s'')
+--                                                Nothing -> case parseChar ')' s' of
+--                                                            Just (_, s'') -> Just (acc ++ [x], s'')
+--                                                            Nothing -> Nothing
+--                                Nothing -> case parseChar ')' s of
+--                                            Just (_, s') -> Just (acc, s')
+--                                            Nothing -> Nothing
