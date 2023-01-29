@@ -1,6 +1,6 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.34.4.
+-- This file has been generated from package.yaml by hpack version 0.35.1.
 --
 -- see: https://github.com/sol/hpack
 
@@ -25,7 +25,7 @@ source-repository head
 
 library
   exposed-modules:
-      Lib
+      HelloWorld
   other-modules:
       Paths_glados
   hs-source-dirs:
@@ -49,8 +49,9 @@ executable glados-exe
 
 test-suite glados-test
   type: exitcode-stdio-1.0
-  main-is: Spec.hs
+  main-is: Main.hs
   other-modules:
+      HelloWorldSpec
       Paths_glados
   hs-source-dirs:
       test
@@ -58,4 +59,5 @@ test-suite glados-test
   build-depends:
       base >=4.7 && <5
     , glados
+    , hspec
   default-language: Haskell2010

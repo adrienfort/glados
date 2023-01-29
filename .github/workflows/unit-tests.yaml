@@ -1,0 +1,22 @@
+name: Unit tests
+
+on: [push, pull_request]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-20.04
+    container:
+      image: haskell:latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Run tests
+        run: make tests_run > tests-results
+
+      - name: Get tests results
+        uses: actions/upload-artifact@v1
+        if: always()
+        with:
+          name: tests-results
+          path: tests-results
