@@ -67,6 +67,22 @@ parsePair p = Parser $ \ s -> case runParser (parseAndWith (,) (parseChar '(') (
                 Just ((_, (a, (_, b))), (')':s')) -> Just ((a, b), s')
                 _ -> Nothing
 
+parseList :: Parser a -> Parser [a]
+parseList p = Parser $ \ s -> case runParser (parseChar '(') s of
+                Just (_, s') -> parseList' p [] s'
+                Nothing -> Nothing
+    where
+        parseList' :: Parser a -> [a] -> String -> Maybe ([a], String)
+        parseList' p acc s = case runParser p s of
+                                Just (x, s') -> case runParser (parseChar ' ') s' of
+                                                Just (_, s'') -> parseList' p (acc ++ [x]) (dropWhile (== ' ') s'')
+                                                Nothing -> case runParser (parseChar ')') s' of
+                                                            Just (_, s'') -> Just (acc ++ [x], s'')
+                                                            Nothing -> Nothing
+                                Nothing -> case runParser (parseChar ')') s of
+                                            Just (_, s') -> Just (acc, s')
+                                            Nothing -> Nothing
+
 --parseList :: Parser a -> Parser [a]
 --parseList p s = case parseChar '(' s of
 --                Just (_, s') -> parseList' p [] s'
