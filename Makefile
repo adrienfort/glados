@@ -15,6 +15,9 @@ fclean: clean
 tests_run:
 	stack test --allow-different-user
 
+tests_run_coverage:
+	stack test --coverage --allow-different-user
+
 re: fclean all
 
 .PHONY: all build exec clean fclean tests_run re

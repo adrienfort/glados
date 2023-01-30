@@ -17,9 +17,19 @@ jobs:
       - name: Run tests
         run: make tests_run > tests-results
 
+      - name: Run tests with coverage
+        run: make tests_run_coverage > tests-results-coverage
+
       - name: Get tests results
         uses: actions/upload-artifact@v1
         if: always()
         with:
           name: tests-results
           path: tests-results
+
+      - name: Get tests with coverage results
+        uses: actions/upload-artifact@v1
+        if: always()
+        with:
+          name: tests-results-coverage
+          path: tests-results-coverage
