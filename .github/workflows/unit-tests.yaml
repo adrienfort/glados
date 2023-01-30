@@ -18,7 +18,7 @@ jobs:
         run: make tests_run > tests-results
 
       - name: Run tests with coverage
-        run: make tests_run_coverage &> tests-results-coverage
+        run: make tests_run_coverage >& tests-results-coverage
 
       - name: Get tests results
         uses: actions/upload-artifact@v1
