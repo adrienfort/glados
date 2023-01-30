@@ -13,9 +13,6 @@ fclean: clean
 	rm -f $(NAME)
 
 tests_run:
-	stack test --allow-different-user
-
-tests_run_coverage:
 	stack test --coverage --allow-different-user
 
 re: fclean all

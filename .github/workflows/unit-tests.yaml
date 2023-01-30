@@ -15,10 +15,7 @@ jobs:
         run: "chown -R $(id -un):$(id -gn) ~"
 
       - name: Run tests
-        run: make tests_run > tests-results
-
-      - name: Run tests with coverage
-        run: make tests_run_coverage 2>& tests-results-coverage
+        run: make tests_run > tests-results 2> tests-coverage
 
       - name: Get tests results
         uses: actions/upload-artifact@v1
@@ -31,5 +28,5 @@ jobs:
         uses: actions/upload-artifact@v1
         if: always()
         with:
-          name: tests-results-coverage
-          path: tests-results-coverage
+          name: tests-coverage
+          path: tests-coverage
