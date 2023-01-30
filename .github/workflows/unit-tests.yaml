@@ -11,6 +11,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
+      - name: Permissions bug workaround
+        run: "chown -R $(id -un):$(id -gn) ~"
+
       - name: Run tests
         run: make tests_run > tests-results
 
