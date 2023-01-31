@@ -14,29 +14,29 @@ on:
   #   types: [opened, reopened, synchronize]
 
 jobs:
-  build:
-    runs-on: ubuntu-20.04
-    container:
-      image: haskell:latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
+  # build:
+  #   runs-on: ubuntu-20.04
+  #   container:
+  #     image: haskell:latest
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v2
 
-      - name: Permissions bug workaround
-        run: "chown -R $(id -un):$(id -gn) ~"
+  #     - name: Permissions bug workaround
+  #       run: "chown -R $(id -un):$(id -gn) ~"
 
-      - name: Build project
-        run: |
-          stack build --install-ghc --allow-different-user
-          stack --local-bin-path build install
-          mv build/glados-exe glados
+  #     - name: Build project
+  #       run: |
+  #         stack build --install-ghc --allow-different-user
+  #         stack --local-bin-path build install
+  #         mv build/glados-exe glados
 
-      - name: Upload project build for the release job
-        uses: actions/upload-artifact@v1
-        if: always()
-        with:
-          name: glados
-          path: glados
+  #     - name: Upload project build for the release job
+  #       uses: actions/upload-artifact@v1
+  #       if: always()
+  #       with:
+  #         name: glados
+  #         path: glados
 
   update_release_draft:
     needs: build
@@ -53,20 +53,30 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Download project build
-        uses: actions/download-artifact@v1
-        with:
-          name: glados
+      - name: Tmp prints
+        run: |
+          echo "${{ steps }}"
+          echo "---"
+          echo "${{ steps.create_release }}"
+          echo "---"
+          echo "${{ steps.create_release.outputs }}"
+          echo "---"
+          echo "${{ steps.create_release.outputs.upload_url }}"
 
-      - name: zip project build
-        run: zip glados.zip glados
+      # - name: Download project build
+      #   uses: actions/download-artifact@v1
+      #   with:
+      #     name: glados
 
-      - name: Upload release asset
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: glados.zip
-          asset_name: glados.zip
-          asset_content_type: application/zip
+      # - name: zip project build
+      #   run: zip glados.zip glados
+
+      # - name: Upload release asset
+      #   uses: actions/upload-release-asset@v1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #   with:
+      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+      #     asset_path: glados.zip
+      #     asset_name: glados.zip
+      #     asset_content_type: application/zip
