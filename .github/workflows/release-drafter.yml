@@ -14,74 +14,105 @@ on:
   #   types: [opened, reopened, synchronize]
 
 jobs:
-  # build:
-  #   runs-on: ubuntu-20.04
-  #   container:
-  #     image: haskell:latest
-  #   steps:
-  #     - name: Checkout repository
-  #       uses: actions/checkout@v2
-
-  #     - name: Permissions bug workaround
-  #       run: "chown -R $(id -un):$(id -gn) ~"
-
-  #     - name: Build project
-  #       run: |
-  #         stack build --install-ghc --allow-different-user
-  #         stack --local-bin-path build install
-  #         mv build/glados-exe glados
-
-  #     - name: Upload project build for the release job
-  #       uses: actions/upload-artifact@v1
-  #       if: always()
-  #       with:
-  #         name: glados
-  #         path: glados
-
-  update_release_draft:
-    # needs: build
+  build:
+    name: Upload Release Asset
     runs-on: ubuntu-latest
     steps:
-      # Drafts your next Release notes as Pull Requests are merged into "main"
-      - name: Create release draft
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: Build project # This would actually build your project, using zip for an example artifact
+        run: |
+          zip --junk-paths my-artifact README.md
+      - name: Create Release
         id: create_release
-        uses: release-drafter/release-drafter@v5.22.0
-        # (Optional) specify config name to use, relative to .github/. Default: release-drafter.yml
-        # with:
-        #   config-name: my-config.yml
-        #   disable-autolabeler: true
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Tmp prints
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          draft: false
+          prerelease: false
+      - name: Upload Release Asset
+        id: upload-release-asset
+        uses: actions/upload-release-asset@v1
         env:
-          TMP_STEPS: ${{ toJson(steps) }}
-          TMP_RELEASE: ${{ toJson(steps.create_release) }}
-          TMP_OUTPUTS: ${{ toJson(steps.create_release.outputs) }}
-          TMP_URL: ${{ steps.create_release.outputs.upload_url }}
-        run: |
-          echo "$TMP_STEPS"
-          echo "---"
-          echo "$TMP_RELEASE"
-          echo "---"
-          echo "$TMP_OUTPUTS"
-          echo "---"
-          echo "$TMP_URL"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./my-artifact.zip
+          asset_name: my-artifact.zip
+          asset_content_type: application/zip
 
-      # - name: Download project build
-      #   uses: actions/download-artifact@v1
-      #   with:
-      #     name: glados
+# jobs:
+#   # build:
+#   #   runs-on: ubuntu-20.04
+#   #   container:
+#   #     image: haskell:latest
+#   #   steps:
+#   #     - name: Checkout repository
+#   #       uses: actions/checkout@v2
 
-      # - name: zip project build
-      #   run: zip glados.zip glados
+#   #     - name: Permissions bug workaround
+#   #       run: "chown -R $(id -un):$(id -gn) ~"
 
-      # - name: Upload release asset
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: glados.zip
-      #     asset_name: glados.zip
-      #     asset_content_type: application/zip
+#   #     - name: Build project
+#   #       run: |
+#   #         stack build --install-ghc --allow-different-user
+#   #         stack --local-bin-path build install
+#   #         mv build/glados-exe glados
+
+#   #     - name: Upload project build for the release job
+#   #       uses: actions/upload-artifact@v1
+#   #       if: always()
+#   #       with:
+#   #         name: glados
+#   #         path: glados
+
+#   update_release_draft:
+#     # needs: build
+#     runs-on: ubuntu-latest
+#     steps:
+#       # Drafts your next Release notes as Pull Requests are merged into "main"
+#       - name: Create release draft
+#         id: create_release
+#         uses: release-drafter/release-drafter@v5.22.0
+#         # (Optional) specify config name to use, relative to .github/. Default: release-drafter.yml
+#         # with:
+#         #   config-name: my-config.yml
+#         #   disable-autolabeler: true
+#         env:
+#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+#       - name: Tmp prints
+#         env:
+#           TMP_STEPS: ${{ toJson(steps) }}
+#           TMP_RELEASE: ${{ toJson(steps.create_release) }}
+#           TMP_OUTPUTS: ${{ toJson(steps.create_release.outputs) }}
+#           TMP_URL: ${{ steps.create_release.outputs.upload_url }}
+#         run: |
+#           echo "$TMP_STEPS"
+#           echo "---"
+#           echo "$TMP_RELEASE"
+#           echo "---"
+#           echo "$TMP_OUTPUTS"
+#           echo "---"
+#           echo "$TMP_URL"
+
+#       # - name: Download project build
+#       #   uses: actions/download-artifact@v1
+#       #   with:
+#       #     name: glados
+
+#       # - name: zip project build
+#       #   run: zip glados.zip glados
+
+#       # - name: Upload release asset
+#       #   uses: actions/upload-release-asset@v1
+#       #   env:
+#       #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#       #   with:
+#       #     upload_url: ${{ steps.create_release.outputs.upload_url }}
+#       #     asset_path: glados.zip
+#       #     asset_name: glados.zip
+#       #     asset_content_type: application/zip
