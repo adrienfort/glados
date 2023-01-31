@@ -2,7 +2,7 @@ BINARY_PATH	:=	$(shell stack path --local-install-root)
 NAME 				= glados
 
 all:
-	stack build --install-ghc
+	stack build --install-ghc --allow-different-user
 	cp $(BINARY_PATH)/bin/$(NAME)-exe ./$(NAME)
 
 clean:
