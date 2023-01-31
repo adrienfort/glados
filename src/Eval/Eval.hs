@@ -5,7 +5,8 @@ module Eval.Eval
         eval
     ) where
 
-data Ast = Integer Int | Symbol String | Boolean String | Call String [Ast] | Define [String] Ast | Lambda [String] Ast
+data Ast = Integer Int | Symbol String | Boolean String | Call String [Ast] | Define (Either String [String]) Ast | Lambda (Either String [String]) Ast
+
 type Env = [(String, Ast)]
 data ReturnValue = Val Int | Bool String | Err String
 type Function = [Ast] -> Env -> ReturnValue
@@ -121,7 +122,7 @@ defineSymbol (a:b) body env = case length (a:b) of
             (Value val) -> (Environment (insertKeyValue a (Integer val) env)) -- get a int value from either an int, a symbol or a function call
             (Bolean val) -> (Environment (insertKeyValue a (Boolean val) env)) -- get a boolean value from either a boolean, a symbol or a function call
             -- pas sur de du expression
-            (Expression _) -> (Environment (insertKeyValue a body env)) -- un truc avec lambda
+            (Expression _) -> (Environment (insertKeyValue a body env))
     _ -> (Environment (insertKeyValue a (Define b body) env)) -- syntax (define (x ...) body)
 
 eval :: Ast -> Env -> Result
