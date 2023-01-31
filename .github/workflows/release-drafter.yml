@@ -28,7 +28,7 @@ jobs:
       - name: Build project
         run: |
           stack build --install-ghc --allow-different-user
-          stack --local-bin-path build
+          stack --local-bin-path build install
           mv build/glados-exe glados
           zip glados.zip glados
 
