@@ -54,14 +54,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Tmp prints
+        env:
+          TMP_STEPS: ${{ toJson(steps) }}
+          TMP_RELEASE: ${{ toJson(steps.create_release) }}
+          TMP_OUTPUTS: ${{ toJson(steps.create_release.outputs) }}
+          TMP_URL: ${{ upload_url }}
         run: |
-          echo "${{ steps }}"
+          echo "$TMP_STEPS"
           echo "---"
-          echo "${{ steps.create_release }}"
+          echo "$TMP_RELEASE"
           echo "---"
-          echo "${{ steps.create_release.outputs }}"
+          echo "$TMP_OUTPUTS"
           echo "---"
-          echo "${{ steps.create_release.outputs.upload_url }}"
+          echo "$TMP_URL"
 
       # - name: Download project build
       #   uses: actions/download-artifact@v1
