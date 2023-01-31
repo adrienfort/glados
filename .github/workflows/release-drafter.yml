@@ -30,14 +30,13 @@ jobs:
           stack build --install-ghc --allow-different-user
           stack --local-bin-path build install
           mv build/glados-exe glados
-          zip glados.zip glados
 
       - name: Upload project build for the release job
         uses: actions/upload-artifact@v1
         if: always()
         with:
-          name: glados.zip
-          path: glados.zip
+          name: glados
+          path: glados
 
   update_release_draft:
     needs: build
@@ -57,7 +56,10 @@ jobs:
       - name: Download project build
         uses: actions/download-artifact@v1
         with:
-          name: glados.zip
+          name: glados
+
+      - name: zip project build
+        run: zip glados.zip glados
 
       - name: Upload release asset
         uses: actions/upload-release-asset@v1
