@@ -58,7 +58,7 @@ jobs:
           TMP_STEPS: ${{ toJson(steps) }}
           TMP_RELEASE: ${{ toJson(steps.create_release) }}
           TMP_OUTPUTS: ${{ toJson(steps.create_release.outputs) }}
-          TMP_URL: ${{ upload_url }}
+          TMP_URL: ${{ steps.create_release.outputs.upload_url }}
         run: |
           echo "$TMP_STEPS"
           echo "---"
