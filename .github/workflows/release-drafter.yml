@@ -26,7 +26,11 @@ jobs:
         run: "chown -R $(id -un):$(id -gn) ~"
 
       - name: Build project
-        run: make && zip glados.zip glados
+        run: |
+          stack build --install-ghc --allow-different-user
+          stack --local-bin-path build
+          mv build/glados-exe glados
+          zip glados.zip glados
 
       - name: Upload project build for the release job
         uses: actions/upload-artifact@v1

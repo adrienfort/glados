@@ -2,7 +2,7 @@ BINARY_PATH	:=	$(shell stack path --local-install-root)
 NAME 				= glados
 
 all:
-	stack build --install-ghc --allow-different-user
+	stack build --install-ghc
 	cp $(BINARY_PATH)/bin/$(NAME)-exe ./$(NAME)
 
 clean:
@@ -13,7 +13,7 @@ fclean: clean
 	rm -f $(NAME)
 
 tests_run:
-	stack test --coverage --allow-different-user
+	stack test --coverage
 
 re: fclean all
 

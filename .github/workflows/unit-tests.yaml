@@ -15,7 +15,7 @@ jobs:
         run: "chown -R $(id -un):$(id -gn) ~"
 
       - name: Run tests
-        run: make tests_run > tests-results 2> tests-coverage
+        run: stack test --coverage --allow-different-user > tests-results 2> tests-coverage
 
       - name: Get tests results
         uses: actions/upload-artifact@v1
