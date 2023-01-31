@@ -13,8 +13,12 @@ The function translated :
             #f
             #t
         )
-    )
-)
+    ))
+
+(define x (lambda (a b) (+ a b)) )
+(x 1 2) ; = 3
+
+(define y ((lambda (a b) (+ a b)) 1 2) ) ; y = 3
 ```
 Giving us :
 ```

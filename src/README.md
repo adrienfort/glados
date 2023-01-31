@@ -39,7 +39,7 @@ Syntax : (define func_name variable)
 #### Assigning a function
 Syntax : (define (func_name [arg1 arg2 ... argN]) (body))
 ```lisp
-(define foo (a b) (if (eq? a b) a b))
+(define (foo a b) (if (eq? a b) a b))
 ```
 
 #### Assigining a lambda
