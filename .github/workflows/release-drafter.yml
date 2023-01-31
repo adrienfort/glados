@@ -32,6 +32,7 @@ jobs:
           path: glados
 
   release:
+    needs: build
     runs-on: ubuntu-latest
     steps:
       - name: Download project build
