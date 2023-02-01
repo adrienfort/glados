@@ -1,11 +1,18 @@
 module Eval.Eval
     (
-        Ast,
+        Ast (..),
         Env,
+        Result (..),
         eval
     ) where
 
 data Ast = Integer Int | Symbol String | Boolean String | Call String [Ast] | Define (Either String [String]) Ast | Lambda (Either String [String]) Ast
+-- data Ast = Integer { getIntAst :: Int }
+    -- | Symbol { getsymbolAst :: String }
+    -- | Boolean { getboolAst :: String }
+    -- | Call { getCallNameAst :: String, getCallArgsAst :: [Ast] }
+    -- | Define { getDefineHeaderAst :: (Either String [String]), getDefineBodyAst :: Ast }
+    -- | Lambda { getLambdaHeaderAst :: (Either String [String]), getLambdaBodyAst :: Ast }
 
 instance Show Ast where
     show (Integer n) = show n
@@ -19,10 +26,30 @@ instance Show Ast where
     show (Lambda (Right []) n) = show n
     show (Lambda (Right (s:_)) n) = s ++ " " ++ show n
 
+instance Eq Ast where
+    (Integer n1) == (Integer n2) = n1 == n2
+    (Symbol n1) == (Symbol n2) = n1 == n2
+    (Boolean n1) == (Boolean n2) = n1 == n2
+    (Call s1 n1) == (Call s2 n2) = s1 == s2 && n1 == n2
+    (Define (Left s1) n1) == (Define (Left s2) n2) = s1 == s2 && n1 == n2
+    (Define (Right s1) n1) == (Define (Right s2) n2) = s1 == s2 && n1 == n2
+    (Lambda (Left s1) n1) == (Lambda (Left s2) n2) = s1 == s2 && n1 == n2
+    (Lambda (Right s1) n1) == (Lambda (Right s2) n2) = s1 == s2 && n1 == n2
+    _ == _ = False
+
 type Env = [(String, Ast)]
+
 data ReturnValue = Val Int | Bool String | Err String
 type Function = [Ast] -> Env -> ReturnValue
-data Result = Value Int | Environment Env | Bolean String | Expression String | Error String
+data Result = Value Int | Environment { getEnv :: Env }| Bolean String | Expression String | Error String
+
+instance Eq Result where
+    (Environment n1) == (Environment n2) = n1 == n2
+    (Value n1) == (Value n2) = n1 == n2
+    (Bolean n1) == (Bolean n2) = n1 == n2
+    (Expression n1) == (Expression n2) = n1 == n2
+    (Error n1) == (Error n2) = n1 == n2
+    _ == _ = False
 
 instance Show Result where
     show (Value n) = show n
@@ -138,7 +165,7 @@ defineSymbol (Right (a:b)) body env = (Environment (insertKeyValue a (Define (Ri
 
 eval :: Ast -> Env -> Result
 eval (Integer a) _ = (Value a)
-eval (Boolean a) _ = (Expression a)
+eval (Boolean a) _ = (Bolean a)
 eval (Symbol a) env = getSymbol a env
 eval (Define a body) env = defineSymbol a body env
 eval (Call a b) env = functionValue a b env
