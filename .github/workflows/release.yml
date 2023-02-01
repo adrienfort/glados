@@ -43,6 +43,17 @@ jobs:
       - name: zip project build
         run: zip -r -j glados.zip glados
 
+      - name: Set env # required to get 'vX.Y.Z' instead of 'refs/tag/vX.Y.Z'
+        run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
+
+      - name: Extract changelog for release version
+        run: |
+          env | grep "VERSION"
+          cp RELEASE_HEAD.md RELEASE.md
+          printf "\n" >> RELEASE.md
+          sed -e "/^## \\[${RELEASE_VERSION:1}\\]/,/^## / ! d" CHANGELOG.md | head -n -2 >> RELEASE.md
+          cat RELEASE.md
+
       - name: Create Release
         id: create_release
         uses: actions/create-release@v1
@@ -51,7 +62,7 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
-          body_path: "release.md"
+          body_path: RELEASE.md
           draft: true
           prerelease: false
 
