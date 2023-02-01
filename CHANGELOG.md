@@ -8,7 +8,7 @@ and this project adheres to the
 
 ## Unreleased
 
-## 0.1.0.0 - 2023-02-01
+## feat/ci-cd-setup - 2023-02-01
 
 ### Added
 

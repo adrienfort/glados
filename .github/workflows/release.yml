@@ -49,7 +49,7 @@ jobs:
       - name: Extract changelog for release version
         run: |
           env | grep "VERSION"
-          cp RELEASE_HEAD.md RELEASE.md
+          touch RELEASE.md
           printf "\n" >> RELEASE.md
           sed -e "/^## \\[${RELEASE_VERSION:1}\\]/,/^## / ! d" CHANGELOG.md | head -n -2 >> RELEASE.md
           cat RELEASE.md
