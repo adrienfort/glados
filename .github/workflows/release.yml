@@ -46,13 +46,11 @@ jobs:
       - name: Set env # required to get 'vX.Y.Z' instead of 'refs/tag/vX.Y.Z'
         run: echo "RELEASE_VERSION=${GITHUB_REF#refs/*/}" >> $GITHUB_ENV
 
-      - name: Extract changelog for release version
-        run: |
-          env | grep "VERSION"
-          touch RELEASE.md
-          printf "\n" >> RELEASE.md
-          sed -e "/^## \\[${RELEASE_VERSION:1}\\]/,/^## / ! d" CHANGELOG.md | head -n -2 >> RELEASE.md
-          cat RELEASE.md
+      # - name: Extract changelog for release version
+      #   run: |
+      #     cp RELEASE_HEAD.md RELEASE.md
+      #     printf "\n" >> RELEASE.md
+      #     sed -e "/^## \\[${RELEASE_VERSION:1}\\]/,/^## / ! d" CHANGELOG.md | head -n -2 >> RELEASE.md
 
       - name: Create Release
         id: create_release
@@ -60,9 +58,9 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
-          release_name: Release ${{ github.ref }}
-          body_path: RELEASE.md
+          tag_name: $RELEASE_VERSION
+          release_name: Release $RELEASE_VERSION
+          # body_path: RELEASE.md
           draft: true
           prerelease: false
 
