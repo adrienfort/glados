@@ -1,4 +1,5 @@
-import HelloWorldSpec
+{-# OPTIONS_GHC -F -pgmF hspec-discover #-}
+-- import HelloWorldSpec
 
-main :: IO ()
-main = helloWorldSpec
+-- main :: IO ()
+-- main = helloWorldSpec
