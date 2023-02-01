@@ -7,11 +7,29 @@ module Eval.Eval
 
 data Ast = Integer Int | Symbol String | Boolean String | Call String [Ast] | Define (Either String [String]) Ast | Lambda (Either String [String]) Ast
 
+instance Show Ast where
+    show (Integer n) = show n
+    show (Symbol n) = n
+    show (Boolean n) = n
+    show (Call s _) = "<function>" ++ s
+    show (Define (Left s) n) = s ++ " " ++ show n
+    show (Define (Right []) n) = show n
+    show (Define (Right (s:_)) n) = s ++ " " ++ show n
+    show (Lambda (Left s) n) = s ++ " " ++ show n
+    show (Lambda (Right []) n) = show n
+    show (Lambda (Right (s:_)) n) = s ++ " " ++ show n
+
 type Env = [(String, Ast)]
 data ReturnValue = Val Int | Bool String | Err String
 type Function = [Ast] -> Env -> ReturnValue
 data Result = Value Int | Environment Env | Bolean String | Expression String | Error String
 
+instance Show Result where
+    show (Value n) = show n
+    show (Environment n) = show n
+    show (Bolean n) = n
+    show (Expression n) = n
+    show (Error n) = n
 getKeyValue :: String -> Env -> Either Ast String
 getKeyValue str env = case lookup str env of
         Nothing -> Right (str ++ " is undefined")
@@ -27,8 +45,6 @@ insertKeyValue str ast env = case lookup str env of
             replaceKey [] = []
             replaceKey ((s, val) : b) | s == str = ((str, ast) : b)
                                     | otherwise = ((s, val) : (replaceKey b))
-            -- replaceKey ((str, _) : b) = ((str, ast) : b)
-            -- replaceKey ((s, val) : b) = ((s, val) : (replaceKey b))
 
 -- add a new key value
 addKeyValue :: String -> Ast -> Env -> Env
@@ -56,7 +72,7 @@ setFunctionEnv (s:sr) (b:br) env = case (eval b env) of
 callFunc :: Ast -> Env -> ReturnValue
 callFunc (Call a []) env = case getKeyValue a env of -- call without args
     Right err -> (Err err)
-    Left (Define s e) -> case (length s) /= 0 of 
+    Left (Define (Right s) e) -> case (length s) /= 0 of 
         False -> case eval e env of -- function doesn't need args
             (Value v) -> (Val v)
             (Bolean v) -> (Bool v)
@@ -66,7 +82,7 @@ callFunc (Call a []) env = case getKeyValue a env of -- call without args
     Left _ -> (Err ("Invalid call " ++ a)) -- get args
 callFunc (Call a b) env = case getKeyValue a env of
     Right err -> (Err err)
-    Left (Define s e) -> case (length s) == (length b) of -- check args nbr
+    Left (Define (Right s) e) -> case (length s) == (length b) of -- check args nbr
         False -> (Err ("Calling " ++ a ++ " with incorrect number of arguments"))
         True -> case setFunctionEnv s b env of -- insert evaluated args in env
             Left nenv -> case eval e nenv of
@@ -100,9 +116,6 @@ getSymbol str env = case getKeyValue str env of
 
 
 -- PROBLEME :
--- (define (x) 2) = assignation de fonction
--- => si fonction ajoute un element vide ?
--- soi Define (Either String [String])
 
 -- (define x (lambda (a b) (+ a b))) = assignation de fonction
 -- => reconnaitre lambda
@@ -111,19 +124,17 @@ getSymbol str env = case getKeyValue str env of
 -- => reconnaitre appel à une lambda
 -- -> Call _ lambda
 
-defineSymbol :: [String] -> Ast -> Env -> Result
-defineSymbol [] _ _ = (Error "Symbol name is not defined")
-defineSymbol (a:b) body env = case length (a:b) of
-    1 -> case body of -- syntax (define x body)
+defineSymbol :: Either String [String] -> Ast -> Env -> Result
+defineSymbol (Left a) body env = case body of -- syntax (define x body)
         (Define _ _) -> (Error ("Symbol " ++ a ++ " invalid assignation"))
         _ -> case eval body env of
             (Environment _) -> (Error ("Symbol " ++ a ++ " invalid assignation (null type)"))
             (Error err) -> (Error err)
             (Value val) -> (Environment (insertKeyValue a (Integer val) env)) -- get a int value from either an int, a symbol or a function call
             (Bolean val) -> (Environment (insertKeyValue a (Boolean val) env)) -- get a boolean value from either a boolean, a symbol or a function call
-            -- pas sur de du expression
-            (Expression _) -> (Environment (insertKeyValue a body env))
-    _ -> (Environment (insertKeyValue a (Define b body) env)) -- syntax (define (x ...) body)
+            (Expression _) -> (Environment (insertKeyValue a body env)) -- pas sur de ca (devrait etre une lambda)
+defineSymbol (Right []) _ _ = (Error "Symbol name is not defined")
+defineSymbol (Right (a:b)) body env = (Environment (insertKeyValue a (Define (Right b) body) env))
 
 eval :: Ast -> Env -> Result
 eval (Integer a) _ = (Value a)
