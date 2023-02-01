@@ -40,9 +40,6 @@ jobs:
         with:
           name: glados
 
-      - name: ls glados
-        run: ls glados
-
       - name: zip project build
         run: zip -r -j glados.zip glados
 
@@ -54,7 +51,8 @@ jobs:
         with:
           tag_name: ${{ github.ref }}
           release_name: Release ${{ github.ref }}
-          draft: false
+          body_path: "../release.md"
+          draft: true
           prerelease: false
 
       - name: Upload Release Asset
