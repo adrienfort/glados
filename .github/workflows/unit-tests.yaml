@@ -1,0 +1,32 @@
+name: Unit tests
+
+on: [push, pull_request]
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-20.04
+    container:
+      image: haskell:latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Permissions bug workaround
+        run: "chown -R $(id -un):$(id -gn) ~"
+
+      - name: Run tests
+        run: stack test --coverage --allow-different-user > tests-results 2> tests-coverage
+
+      - name: Get tests results
+        uses: actions/upload-artifact@v1
+        if: always()
+        with:
+          name: tests-results
+          path: tests-results
+
+      - name: Get tests with coverage results
+        uses: actions/upload-artifact@v1
+        if: always()
+        with:
+          name: tests-coverage
+          path: tests-coverage

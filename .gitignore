@@ -1,4 +1,5 @@
-.stack-work/
 *~
-.gitignore
 glados
+glados.zip
+.vscode/
+.stack-work/
