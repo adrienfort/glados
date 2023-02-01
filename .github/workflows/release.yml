@@ -40,14 +40,11 @@ jobs:
         with:
           name: glados
 
-      - name: cat glados
-        run: cat glados/glados
+      - name: ls glados
+        run: ls glados
 
       - name: zip project build
-        run: zip glados.zip glados/glados
-
-      - name: cat glados.zip
-        run: cat glados.zip
+        run: zip -r -j glados.zip glados
 
       - name: Create Release
         id: create_release
