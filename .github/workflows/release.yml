@@ -41,10 +41,10 @@ jobs:
           name: glados
 
       - name: cat glados
-        run: cat glados
+        run: cat glados/glados
 
       - name: zip project build
-        run: zip glados.zip glados
+        run: zip glados.zip glados/glados
 
       - name: cat glados.zip
         run: cat glados.zip
