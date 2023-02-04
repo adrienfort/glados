@@ -6,7 +6,7 @@ module Eval.Eval
         eval
     ) where
 
-data Ast = Integer Int | Symbol String | Boolean String | Call String [Ast] | Define (Either String [String]) Ast | Lambda (Either String [String]) Ast
+data Ast = Integer Int | Symbol String | Boolean String | Call String [Ast] | Define (Either String [String]) Ast | Lambda [String] Ast
 -- data Ast = Integer { getIntAst :: Int }
     -- | Symbol { getsymbolAst :: String }
     -- | Boolean { getboolAst :: String }
@@ -22,9 +22,8 @@ instance Show Ast where
     show (Define (Left s) n) = s ++ " " ++ show n
     show (Define (Right []) n) = show n
     show (Define (Right (s:_)) n) = s ++ " " ++ show n
-    show (Lambda (Left s) n) = s ++ " " ++ show n
-    show (Lambda (Right []) n) = show n
-    show (Lambda (Right (s:_)) n) = s ++ " " ++ show n
+    show (Lambda [] n) = show n
+    show (Lambda (s:_) n) = s ++ " " ++ show n
 
 instance Eq Ast where
     (Integer n1) == (Integer n2) = n1 == n2
@@ -33,8 +32,7 @@ instance Eq Ast where
     (Call s1 n1) == (Call s2 n2) = s1 == s2 && n1 == n2
     (Define (Left s1) n1) == (Define (Left s2) n2) = s1 == s2 && n1 == n2
     (Define (Right s1) n1) == (Define (Right s2) n2) = s1 == s2 && n1 == n2
-    (Lambda (Left s1) n1) == (Lambda (Left s2) n2) = s1 == s2 && n1 == n2
-    (Lambda (Right s1) n1) == (Lambda (Right s2) n2) = s1 == s2 && n1 == n2
+    (Lambda s1 n1) == (Lambda s2 n2) = s1 == s2 && n1 == n2
     _ == _ = False
 
 type Env = [(String, Ast)]
@@ -86,6 +84,7 @@ isBuiltin (Call a b) env = case lookup a getBuiltins of
                     Just bu -> bu b env
 isBuiltin _ _ = Err "Bad call"
 
+-- and a function arguments into the env
 setFunctionEnv :: [String] -> [Ast] -> Env -> Either Env String
 setFunctionEnv [] (_:_) _ = Right "dog"
 setFunctionEnv (_:_) [] _ = Right "dog"
@@ -97,6 +96,7 @@ setFunctionEnv (s:sr) (b:br) env = case (eval b env) of
     _ -> Right ("Func " ++ s ++ ": no expression in body")
 
 callFunc :: Ast -> Env -> ReturnValue
+-- call lambda
 callFunc (Call a []) env = case getKeyValue a env of -- call without args
     Right err -> (Err err)
     Left (Define (Right s) e) -> case (length s) /= 0 of 
@@ -139,8 +139,8 @@ getSymbol str env = case getKeyValue str env of
     Left (Boolean a) -> (Bolean a)
     Left (Symbol a) -> eval (Symbol a) env
     Left (Define _ _) -> (Expression ("function " ++ str))
+    Left (Lambda _ _) -> (Expression ("function " ++ str))
     Left _ -> (Error "Unknown value")
-
 
 -- PROBLEME :
 
@@ -159,7 +159,7 @@ defineSymbol (Left a) body env = case body of -- syntax (define x body)
             (Error err) -> (Error err)
             (Value val) -> (Environment (insertKeyValue a (Integer val) env)) -- get a int value from either an int, a symbol or a function call
             (Bolean val) -> (Environment (insertKeyValue a (Boolean val) env)) -- get a boolean value from either a boolean, a symbol or a function call
-            (Expression _) -> (Environment (insertKeyValue a body env)) -- pas sur de ca (devrait etre une lambda)
+            (Expression _) -> (Environment (insertKeyValue a body env)) -- got an expression as return value => either a function or a lambda
 defineSymbol (Right []) _ _ = (Error "Symbol name is not defined")
 defineSymbol (Right (a:b)) body env = (Environment (insertKeyValue a (Define (Right b) body) env))
 
@@ -167,6 +167,7 @@ eval :: Ast -> Env -> Result
 eval (Integer a) _ = (Value a)
 eval (Boolean a) _ = (Bolean a)
 eval (Symbol a) env = getSymbol a env
+eval (Lambda _ _) _ = (Expression "lambda")
 eval (Define a body) env = defineSymbol a body env
 eval (Call a b) env = functionValue a b env
 eval _ _ = (Error "Error")
