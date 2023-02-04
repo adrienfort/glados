@@ -13,7 +13,7 @@ parseTree s = case s of
         return (Integer num, rest)
     (x:xs) -> do
         let (symbol, rest) = parseSymbol (x:xs)
-        return (Symbols symbol, rest)
+        if symbol == "" then parseTree rest else return (Symbols symbol, rest)
 
 parseList :: String -> Maybe ([Cpt], String)
 parseList s = case s of
