@@ -98,7 +98,7 @@ ifcondition (a:b:c:[]) env = case eval a env of
         (_) -> (Err ("Invalid arguments to function if " ++ show b ++ " " ++ show c))
     (Error err) -> (Err err)
     (_) -> (Err ("Invalid arguments to function if " ++ show b ++ " " ++ show c))
-ifcondition _ _ = (Err "Invalid arguments to function if")
+ifcondition _ _ = (Err ("Invalid arguments to function if " ++ show b ++ " " ++ show c))
 
 equal :: Function
 equal (a:b:[]) env = case eval a env of
@@ -107,60 +107,60 @@ equal (a:b:[]) env = case eval a env of
             True -> (Bool "#t")
             False -> (Bool "#f")
         (Error err) -> (Err err)
-        (_) -> (Err "Invalid arguments to function +")
+        (_) -> (Err ("Invalid arguments to function eq? " ++ show b))
     (Error err) -> (Err err)
-    (_) -> (Err "Invalid arguments to function +")
-equal _ _ = (Err "Invalid arguments to function eq?")
+    (_) -> (Err ("Invalid arguments to function eq? " ++ show b))
+equal _ _ = (Err ("Invalid arguments to function eq? " ++ show b))
 
 add :: Function
 add (a:b:[]) env = case eval a env of
     (Value a1) -> case eval b env of
         (Value a2) -> (Val (a1 + a2))
         (Error err) -> (Err err)
-        (_) -> (Err "Invalid arguments to function +")
+        (_) -> (Err ("Invalid arguments to function + " ++ show b))
     (Error err) -> (Err err)
-    (_) -> (Err "Invalid arguments to function +")
-add _ _ = (Err "Invalid arguments to function +")
+    (_) -> (Err ("Invalid arguments to function + " ++ show b))
+add _ _ = (Err ("Invalid arguments to function + " ++ show b))
 
 minus :: Function
 minus (a:b:[]) env = case eval a env of
     (Value a1) -> case eval b env of
         (Value a2) -> (Val (a1 - a2))
         (Error err) -> (Err err)
-        (_) -> (Err "Invalid arguments to function +")
+        (_) -> (Err ("Invalid arguments to function - " ++ show b))
     (Error err) -> (Err err)
-    (_) -> (Err "Invalid arguments to function +")
-minus _ _ = (Err "Invalid arguments to function +")
+    (_) -> (Err ("Invalid arguments to function - " ++ show b))
+minus _ _ = (Err ("Invalid arguments to function - " ++ show b))
 
 mult :: Function
 mult (a:b:[]) env = case eval a env of
     (Value a1) -> case eval b env of
         (Value a2) -> (Val (a1 * a2))
         (Error err) -> (Err err)
-        (_) -> (Err "Invalid arguments to function +")
+        (_) -> (Err ("Invalid arguments to function * " ++ show b))
     (Error err) -> (Err err)
-    (_) -> (Err "Invalid arguments to function +")
-mult _ _ = (Err "Invalid arguments to function +")
+    (_) -> (Err ("Invalid arguments to function * " ++ show b))
+mult _ _ = (Err ("Invalid arguments to function * " ++ show b))
 
 division :: Function
 division (a:b:[]) env = case eval a env of
     (Value a1) -> case eval b env of
         (Value a2) -> (Val (a1`div`a2))
         (Error err) -> (Err err)
-        (_) -> (Err "Invalid arguments to function +")
+        (_) -> (Err ("Invalid arguments to function div " ++ show b))
     (Error err) -> (Err err)
-    (_) -> (Err "Invalid arguments to function +")
-division _ _ = (Err "Invalid arguments to function +")
+    (_) -> (Err ("Invalid arguments to function div " ++ show b))
+division _ _ = (Err ("Invalid arguments to function div " ++ show b))
 
 modulo :: Function
 modulo (a:b:[]) env = case eval a env of
     (Value a1) -> case eval b env of
         (Value a2) -> (Val (a1`mod`a2))
         (Error err) -> (Err err)
-        (_) -> (Err "Invalid arguments to function +")
+        (_) -> (Err ("Invalid arguments to function mod " ++ show b))
     (Error err) -> (Err err)
-    (_) -> (Err "Invalid arguments to function +")
-modulo _ _ = (Err "Invalid arguments to function +")
+    (_) -> (Err ("Invalid arguments to function mod " ++ show b))
+modulo _ _ = (Err ("Invalid arguments to function mod " ++ show b))
 
 inferiorto :: Function
 inferiorto (a:b:[]) env = case eval a env of
@@ -169,10 +169,10 @@ inferiorto (a:b:[]) env = case eval a env of
             True -> (Bool "#t")
             False -> (Bool "#f")
         (Error err) -> (Err err)
-        (_) -> (Err "Invalid arguments to function +")
+        (_) -> (Err ("Invalid arguments to function < " ++ show b))
     (Error err) -> (Err err)
-    (_) -> (Err "Invalid arguments to function +")
-inferiorto _ _ = (Err "Invalid arguments to function +")
+    (_) -> (Err ("Invalid arguments to function < " ++ show b))
+inferiorto _ _ = (Err ("Invalid arguments to function < " ++ show b))
 
 
 isBuiltin :: [Ast] -> Env -> ReturnValue
