@@ -38,6 +38,11 @@ spec = do
     describe "Simple define Function error handling" $ do
         it "(define () 2) x " $ do
             isResultError (eval (Define (Right []) (Integer 2)) []) `shouldBe` True
+        it "(define x (define a 2))" $ do
+            isResultError (eval (Define (Left "x") (Define (Left "a") (Integer 2))) []) `shouldBe` True
+        it "(define (x) (define a 2) (x))" $ do
+            let env = eval (Define (Right ["x"]) (Define (Left "a") (Integer 2))) []
+            isResultError (eval (Call [Symbol "x"]) (getEnv env)) `shouldBe` True
     describe "Builtins call" $ do
         it "(* 2 3)" $ do
             eval (Call [Symbol "*", Integer 2, Integer 3]) [] `shouldBe` (Value 6)
