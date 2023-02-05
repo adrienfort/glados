@@ -1,3 +1,4 @@
+module CPT.Cpt where
 import Data.Char (isDigit, isSpace)
 
 data Cpt = Lists [Cpt] | Symbols String | Integer Int deriving (Eq, Show)
