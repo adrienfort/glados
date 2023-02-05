@@ -26,7 +26,7 @@ instance Eq Cpt where
 data Ast = AstInteger Int
   | AstSymbol String
   | AstBoolean String
-  | AstCall String [Ast]
+  | AstCall [Ast]
   | AstDefine (Either String [String]) Ast
   | AstLambda [String] Ast
 
@@ -34,7 +34,8 @@ instance Show Ast where
     show (AstInteger n) = show n
     show (AstSymbol n) = n
     show (AstBoolean n) = "<boolean>" ++ n
-    show (AstCall s _) = "<call>" ++ s
+    show (AstCall []) = "<call>"
+    show (AstCall (s:_)) = "<call>" ++ show s
     show (AstDefine (Left s) n) = "<var>" ++ s ++ " " ++ show n
     show (AstDefine (Right []) n) = "<func> " ++ show n
     show (AstDefine (Right (s:_)) n) = "<func>" ++ s ++ " " ++ show n
@@ -45,7 +46,7 @@ instance Eq Ast where
     (AstInteger n1) == (AstInteger n2) = n1 == n2
     (AstSymbol n1) == (AstSymbol n2) = n1 == n2
     (AstBoolean n1) == (AstBoolean n2) = n1 == n2
-    (AstCall s1 n1) == (AstCall s2 n2) = s1 == s2 && n1 == n2
+    (AstCall c1) == (AstCall c2) = c1 == c2
     (AstDefine (Left s1) n1) == (AstDefine (Left s2) n2) = s1 == s2 && n1 == n2
     (AstDefine (Right s1) n1) == (AstDefine (Right s2) n2) = s1 == s2 && n1 == n2
     (AstLambda s1 n1) == (AstLambda s2 n2) = s1 == s2 && n1 == n2
@@ -58,6 +59,7 @@ printAst :: Ast -> IO ()
 printAst ast = putStrLn (show ast)
 
 cptToAst :: Cpt -> [Ast]
+cptToAst cpt@(CptLists (CptLists ((CptSymbols "lambda"): _) : _)) = [cptToAstLine cpt]
 cptToAst (CptLists (CptLists a : b)) = [cptToAstLine (CptLists a)] ++ cptToAst (CptLists b)
 cptToAst cpt = [cptToAstLine cpt]
 
@@ -67,5 +69,15 @@ cptToAstLine (CptSymbols "True") = AstBoolean "True"
 cptToAstLine (CptSymbols "False") = AstBoolean "False"
 cptToAstLine (CptSymbols s) = AstSymbol s
 cptToAstLine (CptLists [CptSymbols "Define", CptSymbols s, value]) = AstDefine (Left s) (cptToAstLine value)
-cptToAstLine (CptLists [CptSymbols "Define", CptLists [CptSymbols s], value ]) = AstDefine (Right [s]) (cptToAstLine value)
-cptToAstLine _ = AstInteger 0
+cptToAstLine (CptLists [CptSymbols "Define", CptLists keys, value]) = AstDefine (Right (cptListSymbolsToStringArray keys)) (cptToAstLine value)
+cptToAstLine (CptLists [CptSymbols "lambda", CptLists args, value]) = AstLambda (cptListSymbolsToStringArray args) (cptToAstLine value)
+cptToAstLine (CptLists l) = AstCall (cptListToAst l)
+
+cptListSymbolsToStringArray :: [Cpt] -> [String]
+cptListSymbolsToStringArray (CptSymbols a : b) = [a] ++ cptListSymbolsToStringArray b
+cptListSymbolsToStringArray [] = []
+cptListSymbolsToStringArray _ = []
+
+cptListToAst :: [Cpt] -> [Ast]
+cptListToAst (a : b) = [cptToAstLine a] ++ cptListToAst b
+cptListToAst [] = []
