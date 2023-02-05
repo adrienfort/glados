@@ -88,14 +88,16 @@ ifcondition :: Function
 ifcondition (a:b:c:[]) env = case eval a env of
     (Bolean "#t") -> case eval b env of -- evaluate first expression
         (Value r) -> (Val r)
+        (Bolean r) -> (Bool r)
         (Error err) -> (Err err)
-        (_) -> (Err "Invalid arguments to function if")
+        (_) -> (Err ("Invalid arguments to function if " ++ show b ++ " " ++ show c))
     (Bolean "#f") -> case eval c env of -- evaluate second expression
         (Value r) -> (Val r)
+        (Bolean r) -> (Bool r)
         (Error err) -> (Err err)
-        (_) -> (Err "Invalid arguments to function if")
+        (_) -> (Err ("Invalid arguments to function if " ++ show b ++ " " ++ show c))
     (Error err) -> (Err err)
-    (_) -> (Err "Invalid arguments to function if")
+    (_) -> (Err ("Invalid arguments to function if " ++ show b ++ " " ++ show c))
 ifcondition _ _ = (Err "Invalid arguments to function if")
 
 equal :: Function

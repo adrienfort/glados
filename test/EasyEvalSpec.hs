@@ -54,6 +54,10 @@ spec = do
         it "(define add (lambda (a b) (+ a b))) (add 3 4)" $ do
             let env = eval (Define (Left "add") (Lambda ["a", "b"] (Call [Symbol "+", Symbol "a", Symbol "b"]))) []
             eval (Call [Symbol "add", Integer 3, Integer 4]) (getEnv env) `shouldBe` (Value 7)
+    describe "Advanced functions" $ do
+        it "(define (> a b) (if (eq? a b) #f (if (< a b) #f #t))) (> 10 -2)" $ do
+            let env = eval (Define (Right [">", "a", "b"]) (Call [Symbol "if", Call [Symbol "eq?", Symbol "a", Symbol "b"], Boolean "#f", Call [Symbol "if", Call [Symbol "<", Symbol "a", Symbol "b"], Boolean "#f", Boolean "#t"]])) []
+            eval (Call [Symbol ">", Integer 10, Integer (-2)]) (getEnv env) `shouldBe` (Bolean "#t")
     describe "Recursive functions" $ do
         it "(define (fact x) (if (eq? x 1) 1 (* x (fact (- x 1))))) (fact 10)" $ do
             let env = eval (Define (Right ["fact", "x"]) (Call [Symbol "if", Call [Symbol "eq?", Symbol "x", Integer 1], Integer 1, Call [Symbol "*", Symbol "x", Call [Symbol "fact", Call [Symbol "-", Symbol "x", Integer 1]]]])) []
