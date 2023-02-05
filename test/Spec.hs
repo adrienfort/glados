@@ -1,5 +1,6 @@
 import Parser
+import Cpt (cptTest)
 import Test.HUnit
 
 main :: IO Counts
-main = runTestTT parserListTest
+main = runTestTT $ TestList [cptTest, parserListTest]

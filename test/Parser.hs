@@ -1,5 +1,6 @@
 module Parser where
 import CPT.Parser
+--import CPT.Cpt
 import Test.HUnit
 
 parseCharFails :: Test
@@ -122,6 +123,9 @@ parseListSucceeds2 = TestCase $ assertEqual "parseList" Nothing  (runParser (par
 parseListSucceeds3 :: Test
 parseListSucceeds3 = TestCase $ assertEqual "parseList" (Just ([1,2,3,4,5],"")) (runParser (parseList parseInt) "(1 2 3 4 5)")
 
+parseListSucceeds4 :: Test
+parseListSucceeds4 = TestCase $ assertEqual "parseList" Nothing (runParser (parseList parseInt) "(1 2 3 4 bonjour 5)")
+
 parserListTest :: Test
 parserListTest =
   TestList
@@ -163,5 +167,7 @@ parserListTest =
       parsePairSucceeds3,
       parseListSucceeds,
       parseListSucceeds2,
-      parseListSucceeds3
+      parseListSucceeds3,
+      parseListSucceeds4
+--      parseSourceCodeSucceeds
     ]
