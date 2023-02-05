@@ -22,9 +22,8 @@ parseList s = case s of
         (cpt, rest) <- parseTree s
         (cpts, rest') <- parseList rest
         return (cpt:cpts, rest')
-
 parseSymbol :: String -> (String, String)
-parseSymbol s = let (symbol, rest) = span (not . isSpace) s in (symbol, dropWhile isSpace rest)
+parseSymbol s = let (symbol, rest) = span (\c -> not (isSpace c) && c /= ')') s in (symbol, dropWhile isSpace $ rest)
 
 parseInteger :: String -> Maybe (Int, String)
 parseInteger s = case reads s of
