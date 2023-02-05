@@ -44,11 +44,16 @@ parseInteger s = case reads s of
     _ -> Nothing
 
 
-parseSourceCode :: String -> Maybe [Cpt]
-parseSourceCode s = go (removeSpaces $ removeNewLines s) []
+parseSourceCode' :: String -> Maybe [Cpt]
+parseSourceCode' s = go (removeSpaces $ removeNewLines s) []
   where
     go :: String -> [Cpt] -> Maybe [Cpt]
     go "" acc = Just acc
     go s acc = do
         (cpt, rest) <- parseTree s
         go rest (acc ++ [cpt])
+
+parseSourceCode :: String -> [Cpt]
+parseSourceCode s = case parseSourceCode' s of
+    Just cpts -> cpts
+    Nothing -> []
