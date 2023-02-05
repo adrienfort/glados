@@ -1,4 +1,3 @@
-module CPT.Cpt where
 import Data.Char (isDigit, isSpace)
 
 data Cpt = Lists [Cpt] | Symbols String | Integer Int deriving (Eq, Show)
@@ -12,6 +11,8 @@ removeSpaces = foldl go ""
         then acc
         else acc ++ [c]
 
+removeNewLines :: String -> String
+removeNewLines = filter (/= '\n')
 
 parseTree :: String -> Maybe (Cpt, String)
 parseTree s = case removeSpaces s of
@@ -33,6 +34,7 @@ parseList s = case s of
         (cpt, rest) <- parseTree s
         (cpts, rest') <- parseList rest
         return (cpt:cpts, rest')
+
 parseSymbol :: String -> (String, String)
 parseSymbol s = let (symbol, rest) = span (\c -> not (isSpace c) && c /= ')') s in (symbol, dropWhile isSpace $ rest)
 
@@ -42,5 +44,11 @@ parseInteger s = case reads s of
     _ -> Nothing
 
 
-parseSourceCode :: String -> Maybe (Cpt, String)
-parseSourceCode s = parseTree (removeSpaces s)
+parseSourceCode :: String -> Maybe [Cpt]
+parseSourceCode s = go (removeSpaces $ removeNewLines s) []
+  where
+    go :: String -> [Cpt] -> Maybe [Cpt]
+    go "" acc = Just acc
+    go s acc = do
+        (cpt, rest) <- parseTree s
+        go rest (acc ++ [cpt])
