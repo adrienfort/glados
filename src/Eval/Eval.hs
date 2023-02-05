@@ -3,16 +3,11 @@ module Eval.Eval
         Ast (..),
         Env,
         Result (..),
-        eval
+        eval,
+        evaluate
     ) where
 
 data Ast = Integer Int | Symbol String | Boolean String | Call [Ast] | Define (Either String [String]) Ast | Lambda [String] Ast
--- data Ast = Integer { getIntAst :: Int }
-    -- | Symbol { getsymbolAst :: String }
-    -- | Boolean { getboolAst :: String }
-    -- | Call { getCallNameAst :: String, getCallArgsAst :: [Ast] }
-    -- | Define { getDefineHeaderAst :: (Either String [String]), getDefineBodyAst :: Ast }
-    -- | Lambda { getLambdaHeaderAst :: (Either String [String]), getLambdaBodyAst :: Ast }
 
 instance Show Ast where
     show (Integer n) = show n
@@ -56,6 +51,7 @@ instance Show Result where
     show (Bolean n) = n
     show (Expression n) = n
     show (Error n) = n
+
 getKeyValue :: String -> Env -> Either Ast String
 getKeyValue str env = case lookup str env of
         Nothing -> Right (str ++ " is undefined")
@@ -77,7 +73,105 @@ addKeyValue :: String -> Ast -> Env -> Env
 addKeyValue str ast env = (str, ast) : env
 
 getBuiltins :: [(String, Function)]
-getBuiltins = []
+getBuiltins = [
+            ("if", ifcondition),
+            ("+", add),
+            ("-", minus),
+            ("*", mult),
+            ("div", division),
+            ("mod", modulo),
+            ("<", inferiorto),
+            ("eq?", equal)
+            ]
+
+ifcondition :: Function
+ifcondition (a:b:c:[]) env = case eval a env of
+    (Bolean "#t") -> case eval b env of -- evaluate first expression
+        (Value r) -> (Val r)
+        (Error err) -> (Err err)
+        (_) -> (Err "Invalid arguments to function if")
+    (Bolean "#f") -> case eval c env of -- evaluate second expression
+        (Value r) -> (Val r)
+        (Error err) -> (Err err)
+        (_) -> (Err "Invalid arguments to function if")
+    (Error err) -> (Err err)
+    (_) -> (Err "Invalid arguments to function if")
+ifcondition _ _ = (Err "Invalid arguments to function if")
+
+equal :: Function
+equal (a:b:[]) env = case eval a env of
+    (Value a1) -> case eval b env of
+        (Value a2) -> case a1 == a2 of 
+            True -> (Bool "#t")
+            False -> (Bool "#f")
+        (Error err) -> (Err err)
+        (_) -> (Err "Invalid arguments to function +")
+    (Error err) -> (Err err)
+    (_) -> (Err "Invalid arguments to function +")
+equal _ _ = (Err "Invalid arguments to function eq?")
+
+add :: Function
+add (a:b:[]) env = case eval a env of
+    (Value a1) -> case eval b env of
+        (Value a2) -> (Val (a1 + a2))
+        (Error err) -> (Err err)
+        (_) -> (Err "Invalid arguments to function +")
+    (Error err) -> (Err err)
+    (_) -> (Err "Invalid arguments to function +")
+add _ _ = (Err "Invalid arguments to function +")
+
+minus :: Function
+minus (a:b:[]) env = case eval a env of
+    (Value a1) -> case eval b env of
+        (Value a2) -> (Val (a1 - a2))
+        (Error err) -> (Err err)
+        (_) -> (Err "Invalid arguments to function +")
+    (Error err) -> (Err err)
+    (_) -> (Err "Invalid arguments to function +")
+minus _ _ = (Err "Invalid arguments to function +")
+
+mult :: Function
+mult (a:b:[]) env = case eval a env of
+    (Value a1) -> case eval b env of
+        (Value a2) -> (Val (a1 * a2))
+        (Error err) -> (Err err)
+        (_) -> (Err "Invalid arguments to function +")
+    (Error err) -> (Err err)
+    (_) -> (Err "Invalid arguments to function +")
+mult _ _ = (Err "Invalid arguments to function +")
+
+division :: Function
+division (a:b:[]) env = case eval a env of
+    (Value a1) -> case eval b env of
+        (Value a2) -> (Val (a1`div`a2))
+        (Error err) -> (Err err)
+        (_) -> (Err "Invalid arguments to function +")
+    (Error err) -> (Err err)
+    (_) -> (Err "Invalid arguments to function +")
+division _ _ = (Err "Invalid arguments to function +")
+
+modulo :: Function
+modulo (a:b:[]) env = case eval a env of
+    (Value a1) -> case eval b env of
+        (Value a2) -> (Val (a1`mod`a2))
+        (Error err) -> (Err err)
+        (_) -> (Err "Invalid arguments to function +")
+    (Error err) -> (Err err)
+    (_) -> (Err "Invalid arguments to function +")
+modulo _ _ = (Err "Invalid arguments to function +")
+
+inferiorto :: Function
+inferiorto (a:b:[]) env = case eval a env of
+    (Value a1) -> case eval b env of
+        (Value a2) -> case a1 < a2 of
+            True -> (Bool "#t")
+            False -> (Bool "#f")
+        (Error err) -> (Err err)
+        (_) -> (Err "Invalid arguments to function +")
+    (Error err) -> (Err err)
+    (_) -> (Err "Invalid arguments to function +")
+inferiorto _ _ = (Err "Invalid arguments to function +")
+
 
 isBuiltin :: [Ast] -> Env -> ReturnValue
 isBuiltin (Symbol a:b) env = case lookup a getBuiltins of
@@ -124,10 +218,26 @@ callFunc (Symbol a:[]) env = case getKeyValue a env of -- call without args
             (Error err) -> (Err err)
             _ -> (Err (a ++ " : incorrect return type"))
         False -> (Err ("Calling " ++ a ++ " with incorrect number of arguments")) -- func need args
+    Left (Lambda s e) -> case (length s) == 0 of 
+        True -> case eval e env of -- function doesn't need args
+            (Value v) -> (Val v)
+            (Bolean v) -> (Bool v)
+            (Error err) -> (Err err)
+            _ -> (Err (a ++ " : incorrect return type"))
+        False -> (Err ("Calling " ++ a ++ " with incorrect number of arguments")) -- func need args
     Left _ -> (Err ("Invalid call " ++ a))
 callFunc (Symbol a:b) env = case getKeyValue a env of
     Right err -> (Err err)
     Left (Define (Right s) e) -> case (length s) == (length b) of -- check args nbr
+        False -> (Err ("Calling " ++ a ++ " with incorrect number of arguments"))
+        True -> case setFunctionEnv s b env of -- insert evaluated args in env
+            Left nenv -> case eval e nenv of
+                (Value v) -> (Val v)
+                (Bolean v) -> (Bool v)
+                (Error err) -> (Err err)
+                _ -> (Err (a ++ " : incorrect return type"))
+            Right err -> (Err err)
+    Left (Lambda s e) -> case (length s) == (length b) of -- check args nbr
         False -> (Err ("Calling " ++ a ++ " with incorrect number of arguments"))
         True -> case setFunctionEnv s b env of -- insert evaluated args in env
             Left nenv -> case eval e nenv of
@@ -181,3 +291,10 @@ eval (Lambda _ _) _ = (Expression "lambda")
 eval (Define a body) env = defineSymbol a body env
 eval (Call a) env = functionValue a env
 eval _ _ = (Error "Error")
+
+evaluate :: [Ast] -> Env -> [Result]
+evaluate [] _ = []
+evaluate (a:b) env = case eval a env of
+    (Environment nenv) -> evaluate b nenv
+    (Error err) -> [Error err]
+    (res) -> res : evaluate b env
