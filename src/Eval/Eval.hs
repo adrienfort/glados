@@ -6,7 +6,7 @@ module Eval.Eval
         eval
     ) where
 
-data Ast = Integer Int | Symbol String | Boolean String | Call String [Ast] | Define (Either String [String]) Ast | Lambda [String] Ast
+data Ast = Integer Int | Symbol String | Boolean String | Call [Ast] | Define (Either String [String]) Ast | Lambda [String] Ast
 -- data Ast = Integer { getIntAst :: Int }
     -- | Symbol { getsymbolAst :: String }
     -- | Boolean { getboolAst :: String }
@@ -18,7 +18,8 @@ instance Show Ast where
     show (Integer n) = show n
     show (Symbol n) = n
     show (Boolean n) = n
-    show (Call s _) = "<function>" ++ s
+    show (Call []) = "<function>"
+    show (Call (s:_)) = "<function>" ++ show s
     show (Define (Left s) n) = s ++ " " ++ show n
     show (Define (Right []) n) = show n
     show (Define (Right (s:_)) n) = s ++ " " ++ show n
@@ -29,7 +30,7 @@ instance Eq Ast where
     (Integer n1) == (Integer n2) = n1 == n2
     (Symbol n1) == (Symbol n2) = n1 == n2
     (Boolean n1) == (Boolean n2) = n1 == n2
-    (Call s1 n1) == (Call s2 n2) = s1 == s2 && n1 == n2
+    (Call s1) == (Call s2) = s1 == s2
     (Define (Left s1) n1) == (Define (Left s2) n2) = s1 == s2 && n1 == n2
     (Define (Right s1) n1) == (Define (Right s2) n2) = s1 == s2 && n1 == n2
     (Lambda s1 n1) == (Lambda s2 n2) = s1 == s2 && n1 == n2
@@ -78,16 +79,16 @@ addKeyValue str ast env = (str, ast) : env
 getBuiltins :: [(String, Function)]
 getBuiltins = []
 
-isBuiltin :: Ast -> Env -> ReturnValue
-isBuiltin (Call a b) env = case lookup a getBuiltins of
+isBuiltin :: [Ast] -> Env -> ReturnValue
+isBuiltin (Symbol a:b) env = case lookup a getBuiltins of
                     Nothing -> Bool "no"
                     Just bu -> bu b env
 isBuiltin _ _ = Err "Bad call"
 
 -- and a function arguments into the env
 setFunctionEnv :: [String] -> [Ast] -> Env -> Either Env String
-setFunctionEnv [] (_:_) _ = Right "dog"
-setFunctionEnv (_:_) [] _ = Right "dog"
+setFunctionEnv [] (_:_) _ = Right "Invalid arguments"
+setFunctionEnv (_:_) [] _ = Right "Invalid arguments"
 setFunctionEnv [] [] env = Left env
 setFunctionEnv (s:sr) (b:br) env = case (eval b env) of
     (Value v) -> setFunctionEnv sr br (addKeyValue s (Integer v) env)
@@ -95,19 +96,36 @@ setFunctionEnv (s:sr) (b:br) env = case (eval b env) of
     (Error err) -> Right err
     _ -> Right ("Func " ++ s ++ ": no expression in body")
 
-callFunc :: Ast -> Env -> ReturnValue
--- call lambda
-callFunc (Call a []) env = case getKeyValue a env of -- call without args
-    Right err -> (Err err)
-    Left (Define (Right s) e) -> case (length s) /= 0 of 
-        False -> case eval e env of -- function doesn't need args
+callFunc :: [Ast] -> Env -> ReturnValue
+-- lambda call
+callFunc (Lambda a e:[]) env = case (length a) == 0 of
+        True -> case eval e env of -- function doesn't need args
             (Value v) -> (Val v)
             (Bolean v) -> (Bool v)
             (Error err) -> (Err err)
-            _ -> (Err ("Bad function call : " ++ a))
-        True -> (Err ("Calling " ++ a ++ " with incorrect number of arguments")) -- func need args
-    Left _ -> (Err ("Invalid call " ++ a)) -- get args
-callFunc (Call a b) env = case getKeyValue a env of
+            _ -> (Err ("lambda : incorrect return type"))
+        False -> (Err ("Calling lambda with incorrect number of arguments")) -- called func with args
+callFunc (Lambda a e:b) env = case (length a) == (length b) of -- check args nbr
+        False -> (Err ("Calling lambda with incorrect number of arguments"))
+        True -> case setFunctionEnv a b env of -- insert evaluated args in env
+            Left nenv -> case eval e nenv of
+                (Value v) -> (Val v)
+                (Bolean v) -> (Bool v)
+                (Error err) -> (Err err)
+                _ -> (Err ("lambda : incorrect return type"))
+            Right err -> (Err err)
+-- function call
+callFunc (Symbol a:[]) env = case getKeyValue a env of -- call without args
+    Right err -> (Err err)
+    Left (Define (Right s) e) -> case (length s) == 0 of 
+        True -> case eval e env of -- function doesn't need args
+            (Value v) -> (Val v)
+            (Bolean v) -> (Bool v)
+            (Error err) -> (Err err)
+            _ -> (Err (a ++ " : incorrect return type"))
+        False -> (Err ("Calling " ++ a ++ " with incorrect number of arguments")) -- func need args
+    Left _ -> (Err ("Invalid call " ++ a))
+callFunc (Symbol a:b) env = case getKeyValue a env of
     Right err -> (Err err)
     Left (Define (Right s) e) -> case (length s) == (length b) of -- check args nbr
         False -> (Err ("Calling " ++ a ++ " with incorrect number of arguments"))
@@ -116,21 +134,22 @@ callFunc (Call a b) env = case getKeyValue a env of
                 (Value v) -> (Val v)
                 (Bolean v) -> (Bool v)
                 (Error err) -> (Err err)
-                _ -> (Err ("Bad function call : " ++ a))
+                _ -> (Err (a ++ " : incorrect return type"))
             Right err -> (Err err)
     Left _ -> (Err ("Invalid call " ++ a)) -- get args
 callFunc _ _ = (Err "Invalid syntax")
 
-functionValue :: String -> [Ast] -> Env -> Result
-functionValue s e env = case isBuiltin (Call s e) env of
+functionValue :: [Ast] -> Env -> Result
+functionValue [] _ = (Error "Invalid function call")
+functionValue s env = case isBuiltin s env of
     (Val a) -> (Value a) -- check builtin
-    (Bool "no") -> case callFunc (Call s e) env of
+    (Bool "no") -> case callFunc s env of
         (Val a) -> (Value a)
         (Bool a) -> (Bolean a)
         (Err err) -> (Error err)
     (Bool a) -> (Bolean a)
     (Err err) -> (Error err)
-
+functionValue _ _ = (Error "Invalid function call")
 
 getSymbol :: String -> Env -> Result
 getSymbol str env = case getKeyValue str env of
@@ -141,15 +160,6 @@ getSymbol str env = case getKeyValue str env of
     Left (Define _ _) -> (Expression ("function " ++ str))
     Left (Lambda _ _) -> (Expression ("function " ++ str))
     Left _ -> (Error "Unknown value")
-
--- PROBLEME :
-
--- (define x (lambda (a b) (+ a b))) = assignation de fonction
--- => reconnaitre lambda
--- -> mettre un type lambda
--- (define y ((lambda (a b) (+ a b)) 1 2) ) = result appel de fonction
--- => reconnaitre appel à une lambda
--- -> Call _ lambda
 
 defineSymbol :: Either String [String] -> Ast -> Env -> Result
 defineSymbol (Left a) body env = case body of -- syntax (define x body)
@@ -169,5 +179,5 @@ eval (Boolean a) _ = (Bolean a)
 eval (Symbol a) env = getSymbol a env
 eval (Lambda _ _) _ = (Expression "lambda")
 eval (Define a body) env = defineSymbol a body env
-eval (Call a b) env = functionValue a b env
+eval (Call a) env = functionValue a env
 eval _ _ = (Error "Error")

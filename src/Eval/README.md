@@ -1,6 +1,6 @@
 # AST
 ```haskell
-data Ast = Integer Int | Symbol String | Boolean String | Call String [Ast] | Define (Either String [String]) Ast | Lambda [String] Ast
+data Ast = Integer Int | Symbol String | Boolean String | Call [Ast] | Define (Either String [String]) Ast | Lambda [String] Ast
 ```
 
 The function translated :

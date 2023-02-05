@@ -40,7 +40,7 @@ spec = do
             eval (Symbol "x") (getEnv env) `shouldBe` (Expression "function x")
         it "(define (x) 2) (x)" $ do
             let env = eval (Define (Right ["x"]) (Integer 2)) []
-            eval (Call "x" []) (getEnv env) `shouldBe` (Value 2)
+            eval (Call [Symbol "x"]) (getEnv env) `shouldBe` (Value 2)
     describe "Simple define Function error handling" $ do
         it "(define () 2) x " $ do
             isResultError (eval (Define (Right []) (Integer 2)) []) `shouldBe` True
