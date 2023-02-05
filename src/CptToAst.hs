@@ -34,12 +34,12 @@ instance Show Ast where
     show (AstInteger n) = show n
     show (AstSymbol n) = n
     show (AstBoolean n) = "<boolean>" ++ n
-    show (AstCall s _) = "<function>" ++ s
-    show (AstDefine (Left s) n) = "<def var>" ++ s ++ " " ++ show n
-    show (AstDefine (Right []) n) = show n
-    show (AstDefine (Right (s:_)) n) = "<def func>" ++ s ++ " " ++ show n
-    show (AstLambda [] n) = show n
-    show (AstLambda (s:_) n) = s ++ " " ++ show n
+    show (AstCall s _) = "<call>" ++ s
+    show (AstDefine (Left s) n) = "<var>" ++ s ++ " " ++ show n
+    show (AstDefine (Right []) n) = "<func> " ++ show n
+    show (AstDefine (Right (s:_)) n) = "<func>" ++ s ++ " " ++ show n
+    show (AstLambda [] n) = "<lambda>" ++ show n
+    show (AstLambda (s:_) n) = "<lambda>" ++ s ++ " " ++ show n
 
 instance Eq Ast where
     (AstInteger n1) == (AstInteger n2) = n1 == n2
@@ -66,10 +66,6 @@ cptToAstLine (CptInteger i) = AstInteger i
 cptToAstLine (CptSymbols "True") = AstBoolean "True"
 cptToAstLine (CptSymbols "False") = AstBoolean "False"
 cptToAstLine (CptSymbols s) = AstSymbol s
-cptToAstLine (CptLists [CptInteger i]) = AstInteger i
-cptToAstLine (CptLists [CptLists [CptInteger i]]) = AstInteger i
-cptToAstLine (CptLists [CptSymbols s]) = AstSymbol s
-cptToAstLine (CptLists [CptLists [CptSymbols s]]) = AstSymbol s
-cptToAstLine (CptLists (CptSymbols "Define" : CptSymbols s : end)) = AstDefine (Left s) (cptToAstLine (CptLists end))
-cptToAstLine (CptLists (CptSymbols "Define" : CptLists [CptSymbols s] : end)) = AstDefine (Right [s]) (cptToAstLine (CptLists end))
+cptToAstLine (CptLists [CptSymbols "Define", CptSymbols s, value]) = AstDefine (Left s) (cptToAstLine value)
+cptToAstLine (CptLists [CptSymbols "Define", CptLists [CptSymbols s], value ]) = AstDefine (Right [s]) (cptToAstLine value)
 cptToAstLine _ = AstInteger 0
