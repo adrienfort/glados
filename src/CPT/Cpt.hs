@@ -2,8 +2,18 @@ import Data.Char (isDigit, isSpace)
 
 data Cpt = Lists [Cpt] | Symbols String | Integer Int deriving (Eq, Show)
 
+removeSpaces :: String -> String
+removeSpaces = foldl go ""
+  where
+    go :: String -> Char -> String
+    go acc c =
+      if c == ' ' && (null acc || last acc == ' ' || last acc == ')' || last acc == '(')
+        then acc
+        else acc ++ [c]
+
+
 parseTree :: String -> Maybe (Cpt, String)
-parseTree s = case s of
+parseTree s = case removeSpaces s of
     "" -> Nothing
     ('(':xs) -> do
         (cpts, rest) <- parseList xs
@@ -22,7 +32,6 @@ parseList s = case s of
         (cpt, rest) <- parseTree s
         (cpts, rest') <- parseList rest
         return (cpt:cpts, rest')
-
 parseSymbol :: String -> (String, String)
 parseSymbol s = let (symbol, rest) = span (\c -> not (isSpace c) && c /= ')') s in (symbol, dropWhile isSpace $ rest)
 
@@ -31,5 +40,6 @@ parseInteger s = case reads s of
     [(n, rest)] -> Just (n, rest)
     _ -> Nothing
 
+
 parseSourceCode :: String -> Maybe (Cpt, String)
-parseSourceCode s = parseTree (filter (\c -> not (isSpace c) && c /= '\n') s)
+parseSourceCode s = parseTree (removeSpaces s)
