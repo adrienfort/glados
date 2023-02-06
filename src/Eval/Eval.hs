@@ -129,6 +129,7 @@ mult _ _ = (Err "Invalid arguments to function *")
 division :: Function
 division (a:b:[]) env = case eval a env of
     (Value a1) -> case eval b env of
+        (Value 0) -> (Err ("Division by zero in function div " ++ show a ++ " " ++ show b))
         (Value a2) -> (Val (a1`div`a2))
         (Error err) -> (Err err)
         (_) -> (Err ("Invalid arguments to function div " ++ show a ++ " " ++ show b))
