@@ -2,7 +2,7 @@ module EasyEvalSpec (spec) where
 
 import Test.Hspec
 import Eval.Eval
-import Eval.Lib
+import Lib
 
 isResultError :: Result -> Bool
 isResultError (Error _) = True
@@ -74,6 +74,7 @@ spec = do
             isResultError (eval (Call [Symbol "eq?", Integer 3]) []) `shouldBe` True
         it "(eq? 2)" $ do
             isResultError (eval (Call [Symbol "eq?", Integer 2]) []) `shouldBe` True
+
     describe "If function" $ do
         it "(if #t 1 2)" $ do
             eval (Call [Symbol "if", Boolean "#t", Integer 1, Integer 2]) [] `shouldBe` (Value 1)
@@ -83,6 +84,7 @@ spec = do
             eval (Call [Symbol "if", Call [Symbol "eq?", Integer 2, Integer 2], Integer 1, Integer 2]) [] `shouldBe` (Value 1)
         it "(if (eq? 1 2) 1 2)" $ do
             eval (Call [Symbol "if", Call [Symbol "eq?", Integer 1, Integer 2], Integer 1, Integer 2]) [] `shouldBe` (Value 2)
+
     describe "If error handling" $ do
         it "(if #t 1 )" $ do
             isResultError (eval (Call [Symbol "if", Boolean "#t", Integer 1]) []) `shouldBe` True

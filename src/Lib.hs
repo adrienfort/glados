@@ -1,4 +1,4 @@
-module Eval.Lib
+module Lib
     (
         Ast (..),
         Env

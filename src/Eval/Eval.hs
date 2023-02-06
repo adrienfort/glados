@@ -7,7 +7,7 @@ module Eval.Eval
         evaluate
     ) where
 
-import Eval.Lib
+import Lib
 
 data ReturnValue = Val Int | Bool String | Err String
 type Function = [Ast] -> Env -> ReturnValue
