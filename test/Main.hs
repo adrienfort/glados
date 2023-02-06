@@ -1,4 +1,4 @@
-import HelloWorldSpec
+import CptToAstSpec
 
 main :: IO ()
-main = helloWorldSpec
+main = cptToAstSpec

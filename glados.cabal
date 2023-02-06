@@ -25,6 +25,7 @@ source-repository head
 
 library
   exposed-modules:
+      CptToAst
       HelloWorld
   other-modules:
       Paths_glados
@@ -51,6 +52,7 @@ test-suite glados-test
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
+      CptToAstSpec
       HelloWorldSpec
       Paths_glados
   hs-source-dirs:
