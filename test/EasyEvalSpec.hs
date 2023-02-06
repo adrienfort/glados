@@ -52,6 +52,10 @@ spec = do
             eval (AstCall [AstSymbol "*", AstInteger 2, AstInteger 3]) [] `shouldBe` (Value 6)
         it "(* 3 2)" $ do
             eval (AstCall [AstSymbol "*", AstInteger 3, AstInteger 2]) [] `shouldBe` (Value 6)
+        it "(* 3 0)" $ do
+            eval (AstCall [AstSymbol "*", AstInteger 3, AstInteger 0]) [] `shouldBe` (Value 0)
+        it "(* 0 0)" $ do
+            eval (AstCall [AstSymbol "*", AstInteger 0, AstInteger 0]) [] `shouldBe` (Value 0)
 
         it "(* -2 3)" $ do
             eval (AstCall [AstSymbol "*", AstInteger (-2), AstInteger 3]) [] `shouldBe` (Value (-6))
@@ -66,6 +70,10 @@ spec = do
             eval (AstCall [AstSymbol "*", AstInteger (-2), AstInteger (-3)]) [] `shouldBe` (Value 6)
         it "(* -3 -2)" $ do
             eval (AstCall [AstSymbol "*", AstInteger (-3), AstInteger (-2)]) [] `shouldBe` (Value 6)
+        it "(* 3 -0)" $ do
+            eval (AstCall [AstSymbol "*", AstInteger (3), AstInteger (-0)]) [] `shouldBe` (Value 0)
+        it "(* 0 -0)" $ do
+            eval (AstCall [AstSymbol "*", AstInteger (0), AstInteger (-0)]) [] `shouldBe` (Value 0)
 
 
 
@@ -75,33 +83,71 @@ spec = do
             eval (AstCall [AstSymbol "+", AstInteger (-2), AstInteger 3]) [] `shouldBe` (Value 1)
         it "(+ 2 -3)" $ do
             eval (AstCall [AstSymbol "+", AstInteger 2, AstInteger (-3)]) [] `shouldBe` (Value (-1))
+        it "(+ -2 -3)" $ do
+            eval (AstCall [AstSymbol "+", AstInteger (-2), AstInteger (-3)]) [] `shouldBe` (Value (-5))
 
 
         it "(- 2 3)" $ do
             eval (AstCall [AstSymbol "-", AstInteger 2, AstInteger 3]) [] `shouldBe` (Value (-1))
+
+
+
         it "(div 6 3)" $ do
             eval (AstCall [AstSymbol "div", AstInteger 6, AstInteger 3]) [] `shouldBe` (Value 2)
+        it "(div 6 0)" $ do
+            isResultError (eval (AstCall [AstSymbol "div", AstInteger 6, AstInteger 0]) []) `shouldBe` True
+
+
+
         it "(mod 3 3)" $ do
             eval (AstCall [AstSymbol "mod", AstInteger 3, AstInteger 3]) [] `shouldBe` (Value 0)
         it "(eq? 3 3)" $ do
             eval (AstCall [AstSymbol "eq?", AstInteger 3, AstInteger 3]) [] `shouldBe` (Bolean "#t")
         it "(eq? 2 3)" $ do
             eval (AstCall [AstSymbol "eq?", AstInteger 2, AstInteger 3]) [] `shouldBe` (Bolean "#f")
+        it "(eq? 0 0)" $ do
+            eval (AstCall [AstSymbol "eq?", AstInteger 0, AstInteger 0]) [] `shouldBe` (Bolean "#t")
+        it "(eq? -0 0)" $ do
+            eval (AstCall [AstSymbol "eq?", AstInteger (-0), AstInteger 0]) [] `shouldBe` (Bolean "#t")
+        it "(eq? 1 -1)" $ do
+            eval (AstCall [AstSymbol "eq?", AstInteger 1, AstInteger (-1)]) [] `shouldBe` (Bolean "#f")
+
+
+
     describe "Builtins error handling" $ do
         it "(* 2)" $ do
             isResultError (eval (AstCall [AstSymbol "*", AstInteger 2]) []) `shouldBe` True
+        it "(* 2 3 4)" $ do
+            isResultError (eval (AstCall [AstSymbol "*", AstInteger 2, AstInteger 3, AstInteger 4]) []) `shouldBe` True
         it "(+ 2)" $ do
             isResultError (eval (AstCall [AstSymbol "+", AstInteger 2]) []) `shouldBe` True
+        it "(+ 2 2 3)" $ do
+            isResultError (eval (AstCall [AstSymbol "+", AstInteger 2, AstInteger 3, AstInteger 4]) []) `shouldBe` True
         it "(- 2)" $ do
             isResultError (eval (AstCall [AstSymbol "-", AstInteger 2]) []) `shouldBe` True
+        it "(- 2 3 4)" $ do
+            isResultError (eval (AstCall [AstSymbol "-", AstInteger 2, AstInteger 3, AstInteger 4]) []) `shouldBe` True
         it "(div 6)" $ do
             isResultError (eval (AstCall [AstSymbol "div", AstInteger 6]) []) `shouldBe` True
+        it "(div 2 3 4)" $ do
+            isResultError (eval (AstCall [AstSymbol "div", AstInteger 2, AstInteger 3, AstInteger 4]) []) `shouldBe` True
         it "(mod 3)" $ do
             isResultError (eval (AstCall [AstSymbol "mod", AstInteger 3]) []) `shouldBe` True
+        it "(mod 2 3 4)" $ do
+            isResultError (eval (AstCall [AstSymbol "mod", AstInteger 2, AstInteger 3, AstInteger 4]) []) `shouldBe` True
         it "(eq? 3)" $ do
             isResultError (eval (AstCall [AstSymbol "eq?", AstInteger 3]) []) `shouldBe` True
         it "(eq? 2)" $ do
             isResultError (eval (AstCall [AstSymbol "eq?", AstInteger 2]) []) `shouldBe` True
+        it "(eq? 3 2 4)" $ do
+            isResultError (eval (AstCall [AstSymbol "eq?", AstInteger 3, AstInteger 2, AstInteger 4]) []) `shouldBe` True
+        it "(eq? 2 3 4)" $ do
+            isResultError (eval (AstCall [AstSymbol "eq?", AstInteger 2, AstInteger 3, AstInteger 4]) []) `shouldBe` True
+        it "(toto)" $ do
+            isResultError (eval (AstCall [AstSymbol "toto"]) []) `shouldBe` True
+
+
+
     describe "If function" $ do
         it "(if #t 1 2)" $ do
             eval (AstCall [AstSymbol "if", AstBoolean "#t", AstInteger 1, AstInteger 2]) [] `shouldBe` (Value 1)
