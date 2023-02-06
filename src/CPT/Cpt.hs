@@ -1,7 +1,7 @@
 module CPT.Cpt where
 import Data.Char (isDigit, isSpace)
 
-data Cpt = Lists [Cpt] | Symbols String | Integer Int deriving (Eq, Show)
+data Cpt = CptLists [Cpt] | CptSymbols String | CptInteger Int deriving (Eq, Show)
 
 removeSpaces :: String -> String
 removeSpaces = foldl go ""
@@ -20,13 +20,13 @@ parseTree s = case removeSpaces s of
     "" -> Nothing
     ('(':xs) -> do
         (cpts, rest) <- parseList xs
-        return (Lists cpts, rest)
+        return (CptLists cpts, rest)
     (x:xs) | isDigit x -> do
         (num, rest) <- parseInteger (x:xs)
-        return (Integer num, rest)
+        return (CptInteger num, rest)
     (x:xs) -> do
         let (symbol, rest) = parseSymbol (x:xs)
-        if symbol == "" then parseTree rest else return (Symbols symbol, rest)
+        if symbol == "" then parseTree rest else return (CptSymbols symbol, rest)
 
 parseList :: String -> Maybe ([Cpt], String)
 parseList s = case s of
@@ -56,9 +56,9 @@ parseSourceCode' s = go (removeSpaces $ removeNewLines s) []
 
 parseSourceCode :: String -> Cpt
 parseSourceCode s = flatten $ case parseSourceCode' s of
-    Just cpts -> Lists cpts
-    Nothing -> Lists []
+    Just cpts -> CptLists cpts
+    Nothing -> CptLists []
 
 flatten :: Cpt -> Cpt
-flatten (Lists [cpt]) = cpt
+flatten (CptLists [cpt]) = cpt
 flatten cpt = cpt
