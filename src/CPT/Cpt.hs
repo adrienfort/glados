@@ -54,7 +54,11 @@ parseSourceCode' s = go (removeSpaces $ removeNewLines s) []
         (cpt, rest) <- parseTree s
         go rest (acc ++ [cpt])
 
-parseSourceCode :: String -> [Cpt]
-parseSourceCode s = case parseSourceCode' s of
-    Just cpts -> cpts
-    Nothing -> []
+parseSourceCode :: String -> Cpt
+parseSourceCode s = flatten $ case parseSourceCode' s of
+    Just cpts -> Lists cpts
+    Nothing -> Lists []
+
+flatten :: Cpt -> Cpt
+flatten (Lists [cpt]) = cpt
+flatten cpt = cpt
