@@ -27,6 +27,7 @@ library
   exposed-modules:
       HelloWorld
       Eval.Eval
+      Eval.Lib
   other-modules:
       Paths_glados
   hs-source-dirs:

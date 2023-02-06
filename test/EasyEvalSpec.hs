@@ -2,6 +2,7 @@ module EasyEvalSpec (spec) where
 
 import Test.Hspec
 import Eval.Eval
+import Eval.Lib
 
 isResultError :: Result -> Bool
 isResultError (Error _) = True
