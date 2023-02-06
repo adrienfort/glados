@@ -160,7 +160,7 @@ inferiorto _ _ = (Err "Invalid arguments to function <")
 
 
 isBuiltin :: [Ast] -> Env -> ReturnValue
-isBuiltin (Symbol a:b) env = case lookup a getBuiltins of
+isBuiltin (AstSymbol a:b) env = case lookup a getBuiltins of
                     Nothing -> Bool "no"
                     Just bu -> bu b env
 isBuiltin _ _ = Err "Bad call"
@@ -171,19 +171,19 @@ setFunctionEnv [] (_:_) _ = Right "Invalid arguments"
 setFunctionEnv (_:_) [] _ = Right "Invalid arguments"
 setFunctionEnv [] [] env = Left env
 setFunctionEnv (s:sr) (b:br) env = case (eval b env) of
-    (Value v) -> setFunctionEnv sr br (addKeyValue s (Integer v) env)
-    (Bolean v) -> setFunctionEnv sr br (addKeyValue s (Boolean v) env)
+    (Value v) -> setFunctionEnv sr br (addKeyValue s (AstInteger v) env)
+    (Bolean v) -> setFunctionEnv sr br (addKeyValue s (AstBoolean v) env)
     (Error err) -> Right err
     _ -> Right ("Func " ++ s ++ ": no expression in body")
 
 callFunc :: [Ast] -> Env -> ReturnValue
 -- lambda call
-callFunc (Lambda a e:[]) env = case (length a) == 0 of
+callFunc (AstLambda a e:[]) env = case (length a) == 0 of
         True -> case resultToReturnValue (eval e env) of -- function doesn't need args
             (Err "e") -> (Err ("lambda : incorrect return type"))
             v -> v
         False -> (Err ("Calling lambda with incorrect number of arguments")) -- called func with args
-callFunc (Lambda a e:b) env = case (length a) == (length b) of -- check args nbr
+callFunc (AstLambda a e:b) env = case (length a) == (length b) of -- check args nbr
         False -> (Err ("Calling lambda with incorrect number of arguments"))
         True -> case setFunctionEnv a b env of -- insert evaluated args in env
             Left nenv ->case resultToReturnValue (eval e nenv) of
@@ -191,12 +191,12 @@ callFunc (Lambda a e:b) env = case (length a) == (length b) of -- check args nbr
                 v -> v
             Right err -> (Err err)
 -- function call
-callFunc (Symbol a:[]) env = case getKeyValue a env of -- call without args
+callFunc (AstSymbol a:[]) env = case getKeyValue a env of -- call without args
     Right err -> (Err err)
     -- symbol redirect to a function definition
-    Left (Define (Right s) e) -> funcWithoutArgs s e
+    Left (AstDefine (Right s) e) -> funcWithoutArgs s e
     -- symbol redirect to a lambda function
-    Left (Lambda s e) -> funcWithoutArgs s e
+    Left (AstLambda s e) -> funcWithoutArgs s e
     Left _ -> (Err ("Invalid call " ++ a))
     where
         funcWithoutArgs :: [String] -> Ast -> ReturnValue 
@@ -205,12 +205,12 @@ callFunc (Symbol a:[]) env = case getKeyValue a env of -- call without args
                 (Err "e") -> (Err (show a ++ " : incorrect return type"))
                 v -> v
             False -> (Err ("Calling " ++ show a ++ " with incorrect number of arguments")) -- func need args
-callFunc (Symbol a:b) env = case getKeyValue a env of
+callFunc (AstSymbol a:b) env = case getKeyValue a env of
     Right err -> (Err err)
     -- symbol redirect to a function definition
-    Left (Define (Right s) e) -> funcWithArgs s e
+    Left (AstDefine (Right s) e) -> funcWithArgs s e
     -- symbol redirect to a lambda function
-    Left (Lambda s e) -> funcWithArgs s e
+    Left (AstLambda s e) -> funcWithArgs s e
     Left _ -> (Err ("Invalid call " ++ a)) -- get args
     where
         funcWithArgs :: [String] -> Ast -> ReturnValue
@@ -239,32 +239,32 @@ functionValue _ _ = (Error "Invalid function call")
 getSymbol :: String -> Env -> Result
 getSymbol str env = case getKeyValue str env of
     Right err -> (Error err) -- error : didn't find
-    Left (Integer a) -> (Value a)
-    Left (Boolean a) -> (Bolean a)
-    Left (Symbol a) -> eval (Symbol a) env
-    Left (Define _ _) -> (Expression ("function " ++ str))
-    Left (Lambda _ _) -> (Expression ("function " ++ str))
+    Left (AstInteger a) -> (Value a)
+    Left (AstBoolean a) -> (Bolean a)
+    Left (AstSymbol a) -> eval (AstSymbol a) env
+    Left (AstDefine _ _) -> (Expression ("function " ++ str))
+    Left (AstLambda _ _) -> (Expression ("function " ++ str))
     Left _ -> (Error "Unknown value")
 
 defineSymbol :: Either String [String] -> Ast -> Env -> Result
 defineSymbol (Left a) body env = case body of -- syntax (define x body)
-        (Define _ _) -> (Error ("Symbol " ++ a ++ " invalid assignation"))
+        (AstDefine _ _) -> (Error ("Symbol " ++ a ++ " invalid assignation"))
         _ -> case eval body env of
             (Environment _) -> (Error ("Symbol " ++ a ++ " invalid assignation (null type)"))
             (Error err) -> (Error err)
-            (Value val) -> (Environment (insertKeyValue a (Integer val) env)) -- get a int value from either an int, a symbol or a function call
-            (Bolean val) -> (Environment (insertKeyValue a (Boolean val) env)) -- get a boolean value from either a boolean, a symbol or a function call
+            (Value val) -> (Environment (insertKeyValue a (AstInteger val) env)) -- get a int value from either an int, a symbol or a function call
+            (Bolean val) -> (Environment (insertKeyValue a (AstBoolean val) env)) -- get a boolean value from either a boolean, a symbol or a function call
             (Expression _) -> (Environment (insertKeyValue a body env)) -- got an expression as return value => either a function or a lambda
 defineSymbol (Right []) _ _ = (Error "Symbol name is not defined")
-defineSymbol (Right (a:b)) body env = (Environment (insertKeyValue a (Define (Right b) body) env))
+defineSymbol (Right (a:b)) body env = (Environment (insertKeyValue a (AstDefine (Right b) body) env))
 
 eval :: Ast -> Env -> Result
-eval (Integer a) _ = (Value a)
-eval (Boolean a) _ = (Bolean a)
-eval (Symbol a) env = getSymbol a env
-eval (Lambda _ _) _ = (Expression "lambda")
-eval (Define a body) env = defineSymbol a body env
-eval (Call a) env = functionValue a env
+eval (AstInteger a) _ = (Value a)
+eval (AstBoolean a) _ = (Bolean a)
+eval (AstSymbol a) env = getSymbol a env
+eval (AstLambda _ _) _ = (Expression "lambda")
+eval (AstDefine a body) env = defineSymbol a body env
+eval (AstCall a) env = functionValue a env
 eval _ _ = (Error "Error")
 
 evaluate :: [Ast] -> Env -> [Result]

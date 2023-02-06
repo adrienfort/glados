@@ -4,28 +4,28 @@ module Lib
         Env
     ) where
 
-data Ast = Integer Int | Symbol String | Boolean String | Call [Ast] | Define (Either String [String]) Ast | Lambda [String] Ast
+data Ast = AstInteger Int | AstSymbol String | AstBoolean String | AstCall [Ast] | AstDefine (Either String [String]) Ast | AstLambda [String] Ast
 
 type Env = [(String, Ast)]
 
 instance Show Ast where
-    show (Integer n) = show n
-    show (Symbol n) = n
-    show (Boolean n) = n
-    show (Call []) = "<function>"
-    show (Call (s:_)) = "<function>" ++ show s
-    show (Define (Left s) n) = s ++ " " ++ show n
-    show (Define (Right []) n) = show n
-    show (Define (Right (s:_)) n) = s ++ " " ++ show n
-    show (Lambda [] n) = show n
-    show (Lambda (s:_) n) = s ++ " " ++ show n
+    show (AstInteger n) = show n
+    show (AstSymbol n) = n
+    show (AstBoolean n) = n
+    show (AstCall []) = "<function>"
+    show (AstCall (s:_)) = "<function>" ++ show s
+    show (AstDefine (Left s) n) = s ++ " " ++ show n
+    show (AstDefine (Right []) n) = show n
+    show (AstDefine (Right (s:_)) n) = s ++ " " ++ show n
+    show (AstLambda [] n) = show n
+    show (AstLambda (s:_) n) = s ++ " " ++ show n
 
 instance Eq Ast where
-    (Integer n1) == (Integer n2) = n1 == n2
-    (Symbol n1) == (Symbol n2) = n1 == n2
-    (Boolean n1) == (Boolean n2) = n1 == n2
-    (Call s1) == (Call s2) = s1 == s2
-    (Define (Left s1) n1) == (Define (Left s2) n2) = s1 == s2 && n1 == n2
-    (Define (Right s1) n1) == (Define (Right s2) n2) = s1 == s2 && n1 == n2
-    (Lambda s1 n1) == (Lambda s2 n2) = s1 == s2 && n1 == n2
+    (AstInteger n1) == (AstInteger n2) = n1 == n2
+    (AstSymbol n1) == (AstSymbol n2) = n1 == n2
+    (AstBoolean n1) == (AstBoolean n2) = n1 == n2
+    (AstCall s1) == (AstCall s2) = s1 == s2
+    (AstDefine (Left s1) n1) == (AstDefine (Left s2) n2) = s1 == s2 && n1 == n2
+    (AstDefine (Right s1) n1) == (AstDefine (Right s2) n2) = s1 == s2 && n1 == n2
+    (AstLambda s1 n1) == (AstLambda s2 n2) = s1 == s2 && n1 == n2
     _ == _ = False
