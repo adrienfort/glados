@@ -19,14 +19,14 @@ spec = do
             eval (AstInteger 2) [] `shouldBe` (Value 2)
         it "#t" $ do
             eval (AstBoolean "#t") [] `shouldBe` (Bolean "#t")
-    describe "Simple define symbol" $ do
+    describe "Simple define Astsymbol" $ do
         it "(define x 2) x" $ do
             let env = eval (AstDefine (Left "x") (AstInteger 2)) []
             eval (AstSymbol "x") (getEnv env) `shouldBe` (Value 2)
         it "(define x #t) x" $ do
             let env = eval (AstDefine (Left "x") (AstBoolean "#t")) []
             eval (AstSymbol "x") (getEnv env) `shouldBe` (Bolean "#t")
-    describe "Simple define symbol error handling" $ do
+    describe "Simple define Astsymbol error handling" $ do
         it "x" $ do
             isResultError(eval (AstSymbol "x") []) `shouldBe` True
     describe "Simple define Function" $ do
@@ -44,11 +44,39 @@ spec = do
         it "(define (x) (define a 2) (x))" $ do
             let env = eval (AstDefine (Right ["x"]) (AstDefine (Left "a") (AstInteger 2))) []
             isResultError (eval (AstCall [AstSymbol "x"]) (getEnv env)) `shouldBe` True
-    describe "Builtins call" $ do
+
+
+
+    describe "Builtins Astcall" $ do
         it "(* 2 3)" $ do
             eval (AstCall [AstSymbol "*", AstInteger 2, AstInteger 3]) [] `shouldBe` (Value 6)
+        it "(* 3 2)" $ do
+            eval (AstCall [AstSymbol "*", AstInteger 3, AstInteger 2]) [] `shouldBe` (Value 6)
+
+        it "(* -2 3)" $ do
+            eval (AstCall [AstSymbol "*", AstInteger (-2), AstInteger 3]) [] `shouldBe` (Value (-6))
+        it "(* -3 2)" $ do
+            eval (AstCall [AstSymbol "*", AstInteger 2, AstInteger (-3)]) [] `shouldBe` (Value (-6))
+        it "(* 3 -2)" $ do
+            eval (AstCall [AstSymbol "*", AstInteger 3, AstInteger (-2)]) [] `shouldBe` (Value (-6))
+        it "(* 2 -3)" $ do
+            eval (AstCall [AstSymbol "*", AstInteger 2, AstInteger (-3)]) [] `shouldBe` (Value (-6))
+
+        it "(* -2 -3)" $ do
+            eval (AstCall [AstSymbol "*", AstInteger (-2), AstInteger (-3)]) [] `shouldBe` (Value 6)
+        it "(* -3 -2)" $ do
+            eval (AstCall [AstSymbol "*", AstInteger (-3), AstInteger (-2)]) [] `shouldBe` (Value 6)
+
+
+
         it "(+ 2 3)" $ do
             eval (AstCall [AstSymbol "+", AstInteger 2, AstInteger 3]) [] `shouldBe` (Value 5)
+        it "(+ -2 3)" $ do
+            eval (AstCall [AstSymbol "+", AstInteger (-2), AstInteger 3]) [] `shouldBe` (Value 1)
+        it "(+ 2 -3)" $ do
+            eval (AstCall [AstSymbol "+", AstInteger 2, AstInteger (-3)]) [] `shouldBe` (Value (-1))
+
+
         it "(- 2 3)" $ do
             eval (AstCall [AstSymbol "-", AstInteger 2, AstInteger 3]) [] `shouldBe` (Value (-1))
         it "(div 6 3)" $ do
