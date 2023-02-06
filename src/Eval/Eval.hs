@@ -57,7 +57,7 @@ resultToReturnValue r = case r of
     (Value v) -> (Val v)
     (Bolean v) -> (Bool v)
     (Error err) -> (Err err)
-    _ -> (Err ("err"))
+    _ -> (Err ("e"))
 
 getKeyValue :: String -> Env -> Either Ast String
 getKeyValue str env = case lookup str env of
@@ -228,7 +228,6 @@ callFunc (Symbol a:[]) env = case getKeyValue a env of -- call without args
                 (Err "e") -> (Err (show a ++ " : incorrect return type"))
                 v -> v
             False -> (Err ("Calling " ++ show a ++ " with incorrect number of arguments")) -- func need args
-
 callFunc (Symbol a:b) env = case getKeyValue a env of
     Right err -> (Err err)
     -- symbol redirect to a function definition
