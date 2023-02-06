@@ -52,6 +52,13 @@ instance Show Result where
     show (Expression n) = n
     show (Error n) = n
 
+resultToReturnValue :: Result -> ReturnValue
+resultToReturnValue r = case r of
+    (Value v) -> (Val v)
+    (Bolean v) -> (Bool v)
+    (Error err) -> (Err err)
+    _ -> (Err ("err"))
+
 getKeyValue :: String -> Env -> Either Ast String
 getKeyValue str env = case lookup str env of
         Nothing -> Right (str ++ " is undefined")
@@ -195,61 +202,51 @@ setFunctionEnv (s:sr) (b:br) env = case (eval b env) of
 callFunc :: [Ast] -> Env -> ReturnValue
 -- lambda call
 callFunc (Lambda a e:[]) env = case (length a) == 0 of
-        True -> case eval e env of -- function doesn't need args
-            (Value v) -> (Val v)
-            (Bolean v) -> (Bool v)
-            (Error err) -> (Err err)
-            _ -> (Err ("lambda : incorrect return type"))
+        True -> case resultToReturnValue (eval e env) of -- function doesn't need args
+            (Err "e") -> (Err ("lambda : incorrect return type"))
+            v -> v
         False -> (Err ("Calling lambda with incorrect number of arguments")) -- called func with args
 callFunc (Lambda a e:b) env = case (length a) == (length b) of -- check args nbr
         False -> (Err ("Calling lambda with incorrect number of arguments"))
         True -> case setFunctionEnv a b env of -- insert evaluated args in env
-            Left nenv -> case eval e nenv of
-                (Value v) -> (Val v)
-                (Bolean v) -> (Bool v)
-                (Error err) -> (Err err)
-                _ -> (Err ("lambda : incorrect return type"))
+            Left nenv ->case resultToReturnValue (eval e nenv) of
+                (Err "e") -> (Err ("lambda : incorrect return type"))
+                v -> v
             Right err -> (Err err)
 -- function call
 callFunc (Symbol a:[]) env = case getKeyValue a env of -- call without args
     Right err -> (Err err)
-    Left (Define (Right s) e) -> case (length s) == 0 of 
-        True -> case eval e env of -- function doesn't need args
-            (Value v) -> (Val v)
-            (Bolean v) -> (Bool v)
-            (Error err) -> (Err err)
-            _ -> (Err (a ++ " : incorrect return type"))
-        False -> (Err ("Calling " ++ a ++ " with incorrect number of arguments")) -- func need args
-    Left (Lambda s e) -> case (length s) == 0 of 
-        True -> case eval e env of -- function doesn't need args
-            (Value v) -> (Val v)
-            (Bolean v) -> (Bool v)
-            (Error err) -> (Err err)
-            _ -> (Err (a ++ " : incorrect return type"))
-        False -> (Err ("Calling " ++ a ++ " with incorrect number of arguments")) -- func need args
+    -- symbol redirect to a function definition
+    Left (Define (Right s) e) -> funcWithoutArgs s (Symbol a:[]) e env
+    -- symbol redirect to a lambda function
+    Left (Lambda s e) -> funcWithoutArgs s (Symbol a:[]) e env
     Left _ -> (Err ("Invalid call " ++ a))
+    where
+        funcWithoutArgs :: [String] -> [Ast] -> Ast -> Env -> ReturnValue 
+        funcWithoutArgs s (a:b) e env = case (length s) == 0 of 
+            True -> case resultToReturnValue (eval e env) of -- function doesn't need args
+                (Err "e") -> (Err (show a ++ " : incorrect return type"))
+                v -> v
+            False -> (Err ("Calling " ++ show a ++ " with incorrect number of arguments")) -- func need args
+
 callFunc (Symbol a:b) env = case getKeyValue a env of
     Right err -> (Err err)
-    Left (Define (Right s) e) -> case (length s) == (length b) of -- check args nbr
-        False -> (Err ("Calling " ++ a ++ " with incorrect number of arguments"))
-        True -> case setFunctionEnv s b env of -- insert evaluated args in env
-            Left nenv -> case eval e nenv of
-                (Value v) -> (Val v)
-                (Bolean v) -> (Bool v)
-                (Error err) -> (Err err)
-                _ -> (Err (a ++ " : incorrect return type"))
-            Right err -> (Err err)
-    Left (Lambda s e) -> case (length s) == (length b) of -- check args nbr
-        False -> (Err ("Calling " ++ a ++ " with incorrect number of arguments"))
-        True -> case setFunctionEnv s b env of -- insert evaluated args in env
-            Left nenv -> case eval e nenv of
-                (Value v) -> (Val v)
-                (Bolean v) -> (Bool v)
-                (Error err) -> (Err err)
-                _ -> (Err (a ++ " : incorrect return type"))
-            Right err -> (Err err)
+    -- symbol redirect to a function definition
+    Left (Define (Right s) e) -> funcWithArgs s (Symbol a:b) e env
+    -- symbol redirect to a lambda function
+    Left (Lambda s e) -> funcWithArgs s (Symbol a:b) e env
     Left _ -> (Err ("Invalid call " ++ a)) -- get args
+    where
+        funcWithArgs :: [String] -> [Ast] -> Ast -> Env -> ReturnValue
+        funcWithArgs s (a:b) e env = case (length s) == (length b) of -- check args nbr
+            False -> (Err ("Calling " ++ show a ++ " with incorrect number of arguments"))
+            True -> case setFunctionEnv s b env of -- insert evaluated args in env
+                Left nenv -> case resultToReturnValue (eval e nenv) of
+                    (Err "e") -> (Err (show a ++ " : incorrect return type"))
+                    v -> v
+                Right err -> (Err err)
 callFunc _ _ = (Err "Invalid syntax")
+
 
 functionValue :: [Ast] -> Env -> Result
 functionValue [] _ = (Error "Invalid function call")
