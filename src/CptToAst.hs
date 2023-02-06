@@ -60,16 +60,17 @@ printAst ast = putStrLn (show ast)
 
 cptToAst :: Cpt -> [Ast]
 cptToAst cpt@(CptLists (CptLists ((CptSymbols "lambda"): _) : _)) = [cptToAstLine cpt]
+cptToAst (CptLists [CptLists a]) = [cptToAstLine (CptLists a)]
 cptToAst (CptLists (CptLists a : b)) = [cptToAstLine (CptLists a)] ++ cptToAst (CptLists b)
 cptToAst cpt = [cptToAstLine cpt]
 
 cptToAstLine :: Cpt -> Ast
 cptToAstLine (CptInteger i) = AstInteger i
-cptToAstLine (CptSymbols "True") = AstBoolean "True"
-cptToAstLine (CptSymbols "False") = AstBoolean "False"
+cptToAstLine (CptSymbols "#t") = AstBoolean "#t"
+cptToAstLine (CptSymbols "#f") = AstBoolean "#f"
 cptToAstLine (CptSymbols s) = AstSymbol s
-cptToAstLine (CptLists [CptSymbols "Define", CptSymbols s, value]) = AstDefine (Left s) (cptToAstLine value)
-cptToAstLine (CptLists [CptSymbols "Define", CptLists keys, value]) = AstDefine (Right (cptListSymbolsToStringArray keys)) (cptToAstLine value)
+cptToAstLine (CptLists [CptSymbols "define", CptSymbols s, value]) = AstDefine (Left s) (cptToAstLine value)
+cptToAstLine (CptLists [CptSymbols "define", CptLists keys, value]) = AstDefine (Right (cptListSymbolsToStringArray keys)) (cptToAstLine value)
 cptToAstLine (CptLists [CptSymbols "lambda", CptLists args, value]) = AstLambda (cptListSymbolsToStringArray args) (cptToAstLine value)
 cptToAstLine (CptLists l) = AstCall (cptListToAst l)
 
