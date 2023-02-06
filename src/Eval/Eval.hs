@@ -4,7 +4,8 @@ module Eval.Eval
         Env,
         Result (..),
         eval,
-        evaluate
+        evaluate,
+        printEvaluation
     ) where
 
 import Lib
@@ -273,3 +274,7 @@ evaluate (a:b) env = case eval a env of
     (Environment nenv) -> evaluate b nenv
     (Error err) -> [Error err]
     (res) -> res : evaluate b env
+
+printEvaluation :: [Result] -> IO ()
+printEvaluation [] = return ()
+printEvaluation (a:b) = putStrLn (show a) >> printEvaluation b
