@@ -89,12 +89,22 @@ spec = do
 
         it "(- 2 3)" $ do
             eval (AstCall [AstSymbol "-", AstInteger 2, AstInteger 3]) [] `shouldBe` (Value (-1))
+        it "(- -2 3)" $ do
+            eval (AstCall [AstSymbol "-", AstInteger (-2), AstInteger 3]) [] `shouldBe` (Value (-5))
+        it "(- -2 -3)" $ do
+            eval (AstCall [AstSymbol "-", AstInteger (-2), AstInteger (-3)]) [] `shouldBe` (Value (1))
+        it "(- 2 -3)" $ do
+            eval (AstCall [AstSymbol "-", AstInteger 2, AstInteger (-3)]) [] `shouldBe` (Value (5))
 
 
 
         it "(div 6 3)" $ do
             eval (AstCall [AstSymbol "div", AstInteger 6, AstInteger 3]) [] `shouldBe` (Value 2)
+        it "(div 6 -1)" $ do
+            eval (AstCall [AstSymbol "div", AstInteger 6, AstInteger (-1)]) [] `shouldBe` (Value (-6))
         it "(div 6 0)" $ do
+            isResultError (eval (AstCall [AstSymbol "div", AstInteger 6, AstInteger 0]) []) `shouldBe` True
+        it "(div 6 -0)" $ do
             isResultError (eval (AstCall [AstSymbol "div", AstInteger 6, AstInteger 0]) []) `shouldBe` True
 
 
