@@ -1,9 +1,12 @@
 module Eval.Lib
     (
         Ast (..),
+        Env
     ) where
 
 data Ast = Integer Int | Symbol String | Boolean String | Call [Ast] | Define (Either String [String]) Ast | Lambda [String] Ast
+
+type Env = [(String, Ast)]
 
 instance Show Ast where
     show (Integer n) = show n

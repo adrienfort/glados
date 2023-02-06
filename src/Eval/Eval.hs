@@ -9,9 +9,6 @@ module Eval.Eval
 
 import Eval.Lib
 
-
-type Env = [(String, Ast)]
-
 data ReturnValue = Val Int | Bool String | Err String
 type Function = [Ast] -> Env -> ReturnValue
 data Result = Value Int | Environment { getEnv :: Env }| Bolean String | Expression String | Error String
