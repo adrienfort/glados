@@ -1,6 +1,5 @@
 module Eval.Eval
     (
-        -- Ast (..),
         Env,
         Result (..),
         eval,
