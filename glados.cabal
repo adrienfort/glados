@@ -30,6 +30,7 @@ library
       CptToAst
       Eval
       Lib
+      Prompt
   other-modules:
       Paths_glados
   hs-source-dirs:
