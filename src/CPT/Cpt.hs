@@ -62,3 +62,11 @@ parseSourceCode s = flatten $ case parseSourceCode' s of
 flatten :: Cpt -> Cpt
 flatten (CptLists [cpt]) = cpt
 flatten cpt = cpt
+
+countLetters :: String -> Bool
+countLetters str = (length $ filter (== '(') str) == (length $ filter (== ')') str)
+
+parse :: String -> Cpt
+parse s = case countLetters s of
+    True  -> parseSourceCode s
+    False -> CptLists []
