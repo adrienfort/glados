@@ -6,25 +6,25 @@ import Test.HUnit
 --[Integer 1]
 
 parseSourceCodeSucceeds :: Test
-parseSourceCodeSucceeds = TestCase $ assertEqual "parseSourceCodeSucceeds" ([Symbols "foo"]) (parseSourceCode "foo")
+parseSourceCodeSucceeds = TestCase $ assertEqual "parseSourceCodeSucceeds" (CptSymbols "foo") (parseSourceCode "foo")
 
 parseSourceCodeSuccess2 :: Test
-parseSourceCodeSuccess2 = TestCase $ assertEqual "parseSourceCodeSuccess2" ([Integer 42]) (parseSourceCode "42")
+parseSourceCodeSuccess2 = TestCase $ assertEqual "parseSourceCodeSuccess2" (CptInteger 42) (parseSourceCode "42")
 
 parseSourceCodeSuccess3 :: Test
-parseSourceCodeSuccess3 = TestCase $ assertEqual "parseSourceCodeSuccess3" ([Lists [Symbols "foo", Integer 42]]) (parseSourceCode "(foo 42)")
+parseSourceCodeSuccess3 = TestCase $ assertEqual "parseSourceCodeSuccess3" (CptLists [CptSymbols "foo",CptInteger 42]) (parseSourceCode "(foo 42)")
 
 parseSourceCodeSuccess4 :: Test
-parseSourceCodeSuccess4 = TestCase $ assertEqual "parseSourceCodeSuccess4" ([Lists [Lists [Symbols "foo", Symbols "bar", Symbols "baz"], Lists [Integer 1, Integer 2, Integer 3], Lists []]]) (parseSourceCode "(( foo bar baz )(1 2 3) ())")
+parseSourceCodeSuccess4 = TestCase $ assertEqual "parseSourceCodeSuccess4" (CptLists [CptLists [CptSymbols "define",CptSymbols "add",CptLists [CptSymbols "lambda",CptLists [CptSymbols "a",CptSymbols "b"],CptLists [CptSymbols "+",CptSymbols "a",CptSymbols "b"]]],CptLists [CptSymbols "add",CptInteger 3,CptInteger 4]]) (parseSourceCode "(define add\n  (lambda (a b)\n    (+ a b)))\n(add 3 4)")
 
 parseSourceCodeSuccess5 :: Test
-parseSourceCodeSuccess5 = TestCase $ assertEqual "parseSourceCodeSuccess5" ([Lists [Lists [Lists [Lists [Integer 1,Lists [Integer 2],Integer 3]]]]]) (parseSourceCode "((((1(2) 3) ) ) )")
+parseSourceCodeSuccess5 = TestCase $ assertEqual "parseSourceCodeSuccess5" (CptLists [CptLists [CptLists [CptLists [CptInteger 1,CptLists [CptInteger 2],CptInteger 3]]]]) (parseSourceCode "((((1(2) 3) ) ) )")
 
 parseSourceCodeSuccess6 :: Test
-parseSourceCodeSuccess6 = TestCase $ assertEqual "parseSourceCodeSuccess6" ([Lists [Integer 1,Integer 2,Integer 3]]) (parseSourceCode "(1 2 3)")
+parseSourceCodeSuccess6 = TestCase $ assertEqual "parseSourceCodeSuccess6" (CptLists [CptInteger 1,CptInteger 2,CptInteger 3]) (parseSourceCode "(1 2 3)")
 
 parseSourceCodeSuccess7 :: Test
-parseSourceCodeSuccess7 = TestCase $ assertEqual "ParseSourceCodeSuccess7" ([Lists [Symbols "define",Symbols "add",Lists [Symbols "lambda",Lists [Symbols "a",Symbols "b"],Lists [Symbols "+",Symbols "a",Symbols "b"]]],Lists [Symbols "add",Integer 3,Integer 4]]) (parseSourceCode "(define add (lambda (a b) (+ a b))) (add 3 4)")
+parseSourceCodeSuccess7 = TestCase $ assertEqual "ParseSourceCodeSuccess7" (CptLists [CptLists [CptSymbols "foo",CptSymbols "bar",CptSymbols "baz"],CptLists [CptInteger 1,CptInteger 2,CptInteger 3],CptLists [],CptLists [CptLists [CptLists [CptLists [CptInteger 1,CptLists [CptInteger 2],CptInteger 3]]]]]) (parseSourceCode "(( foo bar baz )\n(1 2 3) ()\n((((1(2) 3) ) ) )\n)")
 
 cptTest :: Test
 cptTest =
