@@ -1,7 +1,14 @@
-module CPT.Cpt where
+module CPT.Cpt
+    (
+        Cpt (..),
+        parse
+    )
+    where
+
+import Lib
 import Data.Char (isDigit, isSpace)
 
-data Cpt = CptLists [Cpt] | CptSymbols String | CptInteger Int deriving (Eq, Show)
+-- data Cpt = CptLists [Cpt] | CptSymbols String | CptInteger Int deriving (Eq, Show)
 
 removeSpaces :: String -> String
 removeSpaces = foldl go ""

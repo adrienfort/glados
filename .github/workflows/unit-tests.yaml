@@ -14,19 +14,19 @@ jobs:
       - name: Permissions bug workaround
         run: "chown -R $(id -un):$(id -gn) ~"
 
-      - name: Run tests
-        run: stack test --coverage --allow-different-user > tests-results 2> tests-coverage
+      - name: Run unit tests
+        run: stack test --coverage --allow-different-user > unit-tests-results 2> unit-tests-coverage
 
-      - name: Get tests results
+      - name: Get unit tests results
         uses: actions/upload-artifact@v1
         if: always()
         with:
-          name: tests-results
-          path: tests-results
+          name: unit-tests-results
+          path: unit-tests-results
 
-      - name: Get tests with coverage results
+      - name: Get unit tests with coverage results
         uses: actions/upload-artifact@v1
         if: always()
         with:
-          name: tests-coverage
-          path: tests-coverage
+          name: unit-tests-coverage
+          path: unit-tests-coverage

@@ -1,0 +1,31 @@
+name: Functional tests
+
+on: [push, pull_request]
+
+jobs:
+  functional-tests:
+    runs-on: ubuntu-20.04
+    container:
+      image: haskell:latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Permissions bug workaround
+        run: "chown -R $(id -un):$(id -gn) ~"
+
+      - name: Build project
+        run: |
+          stack build --install-ghc --allow-different-user
+          stack --local-bin-path build install
+          mv build/glados-exe glados
+
+      - name: Run functional tests
+        run: ./functional_tests.sh > functional-tests-results
+
+      - name: Get functional tests results
+        uses: actions/upload-artifact@v1
+        if: always()
+        with:
+          name: functional-tests-results
+          path: functional-tests-results

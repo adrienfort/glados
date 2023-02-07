@@ -1,4 +1,1 @@
-import CptToAstSpec
-
-main :: IO ()
-main = cptToAstSpec
+{-# OPTIONS_GHC -F -pgmF hspec-discover #-}

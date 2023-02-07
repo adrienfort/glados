@@ -27,7 +27,8 @@ library
   exposed-modules:
       CPT.Cpt
       CPT.Parser
-      Eval.Eval
+      CptToAst
+      Eval
       Lib
   other-modules:
       Paths_glados
@@ -56,7 +57,7 @@ test-suite glados-test
   other-modules:
       Parser
       CptToAstSpec
-      HelloWorldSpec
+      EasyEvalSpec
       Paths_glados
   hs-source-dirs:
       test

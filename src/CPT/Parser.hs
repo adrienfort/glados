@@ -1,4 +1,19 @@
-module CPT.Parser where
+module CPT.Parser 
+    (
+        Parser (..),
+        parseChar,
+        parseAnyChar,
+        parseOr,
+        parseAnd,
+        parseAndWith,
+        parseMany,
+        parseSome,
+        parseUInt,
+        parseInt,
+        parsePair,
+        parseList
+    )
+    where
 
 data Parser a = Parser {
 runParser :: String -> Maybe (a , String )
