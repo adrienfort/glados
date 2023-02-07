@@ -58,7 +58,7 @@ test-suite glados-test
       CptToAstSpec
       CptSpec
       ParserSpec
-      EasyEvalSpec
+      EvalSpec
       Paths_glados
   hs-source-dirs:
       test
