@@ -28,7 +28,7 @@ parseTree s = case removeSpaces s of
     ('(':xs) -> do
         (cpts, rest) <- parseList xs
         return (CptLists cpts, rest)
-    (x:xs) | x == '-' -> do
+    (x:xs) | x == '-' && isDigit (head xs) -> do
         (num, rest) <- parseInteger xs
         return (CptInteger (negate num), rest)
     (x:xs) | isDigit x -> do
