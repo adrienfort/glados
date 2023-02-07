@@ -3,7 +3,7 @@ name: Functional tests
 on: [push, pull_request]
 
 jobs:
-  unit-tests:
+  functional-tests:
     runs-on: ubuntu-20.04
     container:
       image: haskell:latest
@@ -21,7 +21,7 @@ jobs:
           mv build/glados-exe glados
 
       - name: Run functional tests
-        run: ./functional_tests.sh
+        run: ./functional_tests.sh > functional-tests-results
 
       - name: Get functional tests results
         uses: actions/upload-artifact@v1
