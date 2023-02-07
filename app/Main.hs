@@ -1,8 +1,9 @@
 module Main (main) where
 
-import CptToAst
+import System.Environment (getArgs)
+import CPT.Cpt
 
 main :: IO ()
--- main = printCpt (CptLists [CptSymbols "define", CptSymbols "x", CptInteger 5])
--- main = compareCpts (CptLists [CptSymbols "define", CptSymbols "x", CptInteger 5]) (CptLists [CptSymbols "define", CptSymbols "x", CptInteger 5])
-main = printAst (AstDefine (Left "x") (AstInteger 1))
+main = do
+    args <- getArgs
+    print $ parse (head args)
