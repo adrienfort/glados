@@ -15,6 +15,10 @@ fclean: clean
 tests_run:
 	stack test --coverage
 
+functionnal: all
+	clear
+	./test/Functionnal/Functionnal.sh
+
 re: fclean all
 
 .PHONY: all build exec clean fclean tests_run re
