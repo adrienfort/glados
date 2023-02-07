@@ -1,5 +1,5 @@
 {-# OPTIONS_GHC -F -pgmF hspec-discover #-}
--- import HelloWorldSpec
-
+-- import CptToAstSpec
+-- 
 -- main :: IO ()
--- main = helloWorldSpec
+-- main = cptToAstSpec
