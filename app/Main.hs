@@ -6,4 +6,5 @@ import CPT.Cpt
 main :: IO ()
 main = do
     args <- getArgs
-    print $ parse (head args)
+    content <- readFile (head args)
+    print $ parse content
