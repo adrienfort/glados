@@ -69,13 +69,21 @@ test "Simple/sous_n.scm" "-42" "-40 - 2"
 
 
 echo -e "\nSubject Test"
-test "Mandatory/factorial.scm" "3628800" "Factorial 10"
-test "Mandatory/foo.scm" "42" "21 * 2"
-test "Mandatory/error.scm" "*** ERROR : variable foo is not bound." "Error no variable"
-test "Mandatory/call.scm" "5" "Just a call (div 10 2)"
-test "Mandatory/lambda1.scm" "#<procedure>" "(lambda (a b) (+ a b))"
-test "Mandatory/lambda2.scm" "3" "((lambda (a b) (+ a b)) 1 2)"
-test "Mandatory/lambda3.scm" "7" "Lambda 3: create lambda + add"
+test "Subject/factorial.scm" "3628800" "Factorial 10"
+test "Subject/foo.scm" "42" "21 * 2"
+test "Subject/error.scm" "*** ERROR : variable foo is not bound." "Error no variable"
+test "Subject/call.scm" "5" "Just a call (div 10 2)"
+test "Subject/lambda1.scm" "#<procedure>" "(lambda (a b) (+ a b))"
+test "Subject/lambda2.scm" "3" "((lambda (a b) (+ a b)) 1 2)"
+test "Subject/lambda3.scm" "7" "Lambda 3: create lambda + add"
+test "Subject/function1.scm" "7" "Create add function"
+test "Subject/if1.scm" "1" "(if #t 1 2)"
+test "Subject/if2.scm" "2" "(if #f 1 2)"
+test "Subject/if3.scm" "21" "Define if >"
+test "Subject/builtins1.scm" "11" "(+ (* 2 3) (div 10 2))"
+# test "Subject/builtins2.scm" "#t" "(+ (* 2 3) (div 10 2))"
+# test "Subject/builtins3.scm" "#f" "(+ (* 2 3) (div 10 2))"
+
 
 
 
