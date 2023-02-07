@@ -26,7 +26,8 @@ source-repository head
 library
   exposed-modules:
       CptToAst
-      HelloWorld
+      Eval
+      Lib
   other-modules:
       Paths_glados
   hs-source-dirs:
@@ -53,7 +54,7 @@ test-suite glados-test
   main-is: Main.hs
   other-modules:
       CptToAstSpec
-      HelloWorldSpec
+      EasyEvalSpec
       Paths_glados
   hs-source-dirs:
       test

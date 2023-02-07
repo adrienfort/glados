@@ -1,10 +1,10 @@
-module CptToAstSpec (cptToAstSpec) where
+module CptToAstSpec (spec) where
 
 import Test.Hspec
 import CptToAst
 
-cptToAstBasicSpec :: IO ()
-cptToAstBasicSpec = hspec $ do
+cptToAstBasicSpec :: Spec
+cptToAstBasicSpec = do
   describe "CptToAst Basic" $ do
     it "case Integer" $ do
       cptToAst (CptInteger 1) `shouldBe` [AstInteger 1]
@@ -15,8 +15,8 @@ cptToAstBasicSpec = hspec $ do
     it "case a" $ do
       cptToAst (CptSymbols "a") `shouldBe` [AstSymbol "a"]
 
-cptToAstDefineSpec :: IO ()
-cptToAstDefineSpec = hspec $ do
+cptToAstDefineSpec :: Spec
+cptToAstDefineSpec = do
   describe "CptToAst define" $ do
     it "case define x 1" $ do
       cptToAst (CptLists[CptSymbols "define", CptSymbols "x", CptInteger 1])
@@ -37,8 +37,8 @@ cptToAstDefineSpec = hspec $ do
       cptToAst (CptLists[CptSymbols "define", CptLists[CptSymbols "a"], CptSymbols "#t"])
         `shouldBe` [AstDefine (Right ["a"]) (AstBoolean "#t")]
 
-cptToAstCallSpec :: IO ()
-cptToAstCallSpec = hspec $ do
+cptToAstCallSpec :: Spec
+cptToAstCallSpec = do
   describe "CptToAst Call" $ do
     it "case define (x) (1)" $ do
       cptToAst (CptLists[CptSymbols "define", CptLists[CptSymbols "x"], CptLists[CptInteger 1]])
@@ -80,8 +80,8 @@ cptToAstCallSpec = hspec $ do
       cptToAst (CptLists[CptSymbols "or", CptSymbols "#t", CptSymbols "#t"])
         `shouldBe` [AstCall [AstSymbol "or", AstBoolean "#t", AstBoolean "#t"]]
 
-cptToAstLambdaSpec :: IO ()
-cptToAstLambdaSpec = hspec $ do
+cptToAstLambdaSpec :: Spec
+cptToAstLambdaSpec = do
   describe "CptToAst Lambda" $ do
     it "case (lambda (a) (- a))" $ do
       cptToAst (CptLists[CptSymbols "lambda", CptLists[CptSymbols "a"], CptLists[CptSymbols "-", CptSymbols "a"]])
@@ -96,8 +96,8 @@ cptToAstLambdaSpec = hspec $ do
       cptToAst (CptLists[CptSymbols "define", CptSymbols "x", CptLists[CptLists[CptSymbols "lambda", CptLists[CptSymbols "a", CptSymbols "b"], CptLists[CptSymbols "+", CptSymbols "a", CptSymbols "b"]], CptInteger 1, CptInteger 2]])
         `shouldBe` [AstDefine (Left "x") (AstCall [(AstLambda ["a", "b"] (AstCall [AstSymbol "+", AstSymbol "a", AstSymbol "b"])), AstInteger 1, AstInteger 2])]
 
-cptToAstGlobalSpec :: IO ()
-cptToAstGlobalSpec = hspec $ do
+cptToAstGlobalSpec :: Spec
+cptToAstGlobalSpec = do
   describe "CptToAst Global" $ do
     it "case (Define add (lambda (a b) (+ a b))) (add 3 4)" $ do
       cptToAst (CptLists [CptLists [CptSymbols "define", CptSymbols "add", CptLists [CptSymbols "lambda", CptLists [CptSymbols "a", CptSymbols "b"], CptLists [CptSymbols "+", CptSymbols "a", CptSymbols "b"]]], CptLists [CptSymbols "add", CptInteger 3, CptInteger 4]])
@@ -106,8 +106,8 @@ cptToAstGlobalSpec = hspec $ do
       cptToAst (CptLists [CptLists [CptSymbols "define", CptLists [CptSymbols "fact", CptSymbols "x"], CptLists [CptSymbols "if", CptLists [CptSymbols "eq?", CptSymbols "x", CptInteger 1], CptInteger 1, CptLists [CptSymbols "*", CptSymbols "x", CptLists [CptSymbols "fact", CptLists [CptSymbols "-", CptSymbols "x", CptInteger 1]]]]], CptLists [CptSymbols "fact", CptInteger 10]])
         `shouldBe` [AstDefine (Right ["fact", "x"]) (AstCall [AstSymbol "if", AstCall [AstSymbol "eq?", AstSymbol "x", AstInteger 1], AstInteger 1, AstCall [AstSymbol "*", AstSymbol "x", AstCall [AstSymbol "fact", AstCall [AstSymbol "-", AstSymbol "x", AstInteger 1]]]]), AstCall [AstSymbol "fact", AstInteger 10]]
 
-cptToAstSpec :: IO ()
-cptToAstSpec = do
+spec :: Spec
+spec = do
   cptToAstBasicSpec
   cptToAstDefineSpec
   cptToAstCallSpec
