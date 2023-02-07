@@ -1,4 +1,4 @@
-module Eval.Eval
+module Eval
     (
         Env,
         Result (..),

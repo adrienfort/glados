@@ -1,6 +1,6 @@
 # Glados
 
-## Types 
+## Types
 - <span style="color:orange">Integer</span> Int
 - <span style="color:orange">Symbol</span> String
 - <span style="color:orange">Boolean</span> #t <sub>or </sub> #f

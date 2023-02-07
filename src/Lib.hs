@@ -1,10 +1,6 @@
-module Lib
-    (
-        Ast (..),
-        Env
-    ) where
+module Lib (Ast (..), Env) where
 
-data Ast = AstInteger Int 
+data Ast = AstInteger Int
     | AstSymbol String
     | AstBoolean String
     | AstCall [Ast]
@@ -24,16 +20,6 @@ instance Show Ast where
     show (AstDefine (Right (s:_)) n) = s ++ " " ++ show n
     show (AstLambda [] n) = show n
     show (AstLambda (s:_) n) = s ++ " " ++ show n
-    -- show (AstInteger n) = show n
-    -- show (AstSymbol n) = n
-    -- show (AstBoolean n) = "<boolean>" ++ n
-    -- show (AstCall []) = "<call>"
-    -- show (AstCall (s:_)) = "<call>" ++ show s
-    -- show (AstDefine (Left s) n) = "<var>" ++ s ++ " " ++ show n
-    -- show (AstDefine (Right []) n) = "<func> " ++ show n
-    -- show (AstDefine (Right (s:_)) n) = "<func>" ++ s ++ " " ++ show n
-    -- show (AstLambda [] n) = "<lambda>" ++ show n
-    -- show (AstLambda (s:_) n) = "<lambda>" ++ s ++ " " ++ show n
 
 instance Eq Ast where
     (AstInteger n1) == (AstInteger n2) = n1 == n2
@@ -44,11 +30,3 @@ instance Eq Ast where
     (AstDefine (Right s1) n1) == (AstDefine (Right s2) n2) = s1 == s2 && n1 == n2
     (AstLambda s1 n1) == (AstLambda s2 n2) = s1 == s2 && n1 == n2
     _ == _ = False
-    -- (AstInteger n1) == (AstInteger n2) = n1 == n2
-    -- (AstSymbol n1) == (AstSymbol n2) = n1 == n2
-    -- (AstBoolean n1) == (AstBoolean n2) = n1 == n2
-    -- (AstCall c1) == (AstCall c2) = c1 == c2
-    -- (AstDefine (Left s1) n1) == (AstDefine (Left s2) n2) = s1 == s2 && n1 == n2
-    -- (AstDefine (Right s1) n1) == (AstDefine (Right s2) n2) = s1 == s2 && n1 == n2
-    -- (AstLambda s1 n1) == (AstLambda s2 n2) = s1 == s2 && n1 == n2
-    -- _ == _ = False

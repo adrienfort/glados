@@ -14,8 +14,9 @@ fclean: clean
 
 tests_run:
 	stack test --coverage
-	# ./test/Functionnal/Functionnal.sh
 
+functional_tests: re
+	./functional_tests.sh
 
 re: fclean all
 

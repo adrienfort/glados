@@ -1,7 +1,7 @@
 module Main (main) where
 
 import CptToAst
-import Eval.Eval
+import Eval
 
 main :: IO ()
 -- main = printCpt (CptLists [CptSymbols "define", CptSymbols "x", CptInteger 5])
