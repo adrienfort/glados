@@ -36,7 +36,7 @@ check_executable
 test "test_example.scm" "10" "Sample test"
 
 
-
+echo -e "\nSimple Test"
 # *
 test "Simple/mult_p.scm" "42" "21 * 2"
 test "Simple/mult_n.scm" "-42" "-21 * 2"
@@ -68,12 +68,12 @@ test "Simple/sous_n.scm" "-42" "-40 - 2"
 
 
 
-
+echo -e "\nSubject Test"
 test "Mandatory/factorial.scm" "3628800" "Factorial 10"
 test "Mandatory/foo.scm" "42" "21 * 2"
 test "Mandatory/error.scm" "*** ERROR : variable foo is not bound." "Error no variable"
-test "Mandatory/call.scm" "5" "Just a div"
-test "Mandatory/call.scm" "5" "Just a div"
+test "Mandatory/call.scm" "5" "Just a call (div 10 2)"
+# test "Mandatory/call.scm" "5" "Just a div"
 
 
 
