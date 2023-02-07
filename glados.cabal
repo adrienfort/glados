@@ -55,16 +55,17 @@ test-suite glados-test
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
-      CptToAstSpec
       CptSpec
-      ParserSpec
+      CptToAstSpec
       EasyEvalSpec
+      ParserSpec
+      Spec
       Paths_glados
   hs-source-dirs:
       test
   ghc-options: -Wall -Wcompat -Widentities -Wincomplete-record-updates -Wincomplete-uni-patterns -Wmissing-export-lists -Wmissing-home-modules -Wpartial-fields -Wredundant-constraints -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-    base >=4.7 && <5
+      base >=4.7 && <5
     , glados
     , hspec
   default-language: Haskell2010
