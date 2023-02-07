@@ -73,7 +73,9 @@ test "Mandatory/factorial.scm" "3628800" "Factorial 10"
 test "Mandatory/foo.scm" "42" "21 * 2"
 test "Mandatory/error.scm" "*** ERROR : variable foo is not bound." "Error no variable"
 test "Mandatory/call.scm" "5" "Just a call (div 10 2)"
-# test "Mandatory/call.scm" "5" "Just a div"
+test "Mandatory/lambda1.scm" "#<procedure>" "(lambda (a b) (+ a b))"
+test "Mandatory/lambda2.scm" "3" "((lambda (a b) (+ a b)) 1 2)"
+test "Mandatory/lambda3.scm" "7" "Lambda 3: create lambda + add"
 
 
 
