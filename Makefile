@@ -13,7 +13,7 @@ fclean: clean
 	rm -f $(NAME)
 
 tests_run:
-	stack test
+	stack test --coverage
 
 re: fclean all
 

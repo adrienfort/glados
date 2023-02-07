@@ -1,6 +1,8 @@
 module Main (main) where
 
-import Lib
+import CptToAst
 
 main :: IO ()
-main = someFunc
+-- main = printCpt (CptLists [CptSymbols "define", CptSymbols "x", CptInteger 5])
+-- main = compareCpts (CptLists [CptSymbols "define", CptSymbols "x", CptInteger 5]) (CptLists [CptSymbols "define", CptSymbols "x", CptInteger 5])
+main = printAst (AstDefine (Left "x") (AstInteger 1))
