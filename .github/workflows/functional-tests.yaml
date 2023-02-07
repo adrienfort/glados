@@ -1,4 +1,4 @@
-name: Unit tests
+name: Functional tests
 
 on: [push, pull_request]
 
@@ -14,8 +14,14 @@ jobs:
       - name: Permissions bug workaround
         run: "chown -R $(id -un):$(id -gn) ~"
 
-      - name: Run tests
-        run: make functional_tests
+      - name: Build project
+        run: |
+          stack build --install-ghc --allow-different-user
+          stack --local-bin-path build install
+          mv build/glados-exe glados
+
+      - name: Run functional tests
+        run: ./functional_tests.sh
 
       - name: Get functional tests results
         uses: actions/upload-artifact@v1
