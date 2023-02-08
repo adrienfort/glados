@@ -25,6 +25,8 @@ source-repository head
 
 library
   exposed-modules:
+      CPT.Cpt
+      CPT.Parser
       CptToAst
       Eval
       Lib
@@ -53,8 +55,10 @@ test-suite glados-test
   type: exitcode-stdio-1.0
   main-is: Main.hs
   other-modules:
+      CptSpec
       CptToAstSpec
       EasyEvalSpec
+      ParserSpec
       Paths_glados
   hs-source-dirs:
       test

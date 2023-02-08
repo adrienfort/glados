@@ -3,27 +3,11 @@ module CptToAst (
   Ast (..),
   printCpt,
   printAst,
-  cptToAst
+  cptToAst,
+  startCptToAst
 ) where
 
 import Lib
-
-data Cpt = CptLists [Cpt]
-  | CptSymbols String
-  | CptInteger Int
-
-instance Show Cpt where
-  show (CptLists (a : b)) = show a ++ show b
-  show (CptLists []) = ""
-  show (CptSymbols s) = show s
-  show (CptInteger i) = show i
-
-instance Eq Cpt where
-  (CptLists (a1 : b1)) == (CptLists (a2 : b2)) = a1 == a2 && b1 == b2
-  (CptLists []) == (CptLists []) = True
-  (CptSymbols s1) == (CptSymbols s2) = s1 == s2
-  (CptInteger i1) == (CptInteger i2) = i1 == i2
-  _ == _ = False
 
 printCpt :: Cpt -> IO ()
 printCpt cpt = putStrLn (show cpt)
@@ -36,6 +20,11 @@ cptToAst cpt@(CptLists (CptLists ((CptSymbols "lambda"): _) : _)) = [cptToAstLin
 cptToAst (CptLists [CptLists a]) = [cptToAstLine (CptLists a)]
 cptToAst (CptLists (CptLists a : b)) = [cptToAstLine (CptLists a)] ++ cptToAst (CptLists b)
 cptToAst cpt = [cptToAstLine cpt]
+
+startCptToAst :: Cpt -> [Ast]
+startCptToAst (CptLists []) = []
+startCptToAst (CptLists (a:b)) = cptToAst a ++ startCptToAst (CptLists b)
+startCptToAst _ = []
 
 cptToAstLine :: Cpt -> Ast
 cptToAstLine (CptInteger i) = AstInteger i

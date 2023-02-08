@@ -24,6 +24,6 @@ test() {
 }
 
 check_executable
-test test_example.scm "x 1" "Sample test"
+test test_example.scm "10" "Sample test"
 
 exit $EXIT_SUCESS

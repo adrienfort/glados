@@ -1,10 +1,12 @@
 module Main (main) where
 
+import System.Environment (getArgs)
+import CPT.Cpt
 import CptToAst
 import Eval
 
 main :: IO ()
--- main = printCpt (CptLists [CptSymbols "define", CptSymbols "x", CptInteger 5])
--- main = compareCpts (CptLists [CptSymbols "define", CptSymbols "x", CptInteger 5]) (CptLists [CptSymbols "define", CptSymbols "x", CptInteger 5])
-main = printAst (AstDefine (Left "x") (AstInteger 1))
--- main = printEvaluation (evaluate [Ast] [])
+main = do
+    args <- getArgs
+    content <- readFile (head args)
+    printEvaluation (evaluate (startCptToAst (parse content)) [])
