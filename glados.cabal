@@ -58,7 +58,7 @@ test-suite glados-test
   other-modules:
       CptSpec
       CptToAstSpec
-      EasyEvalSpec
+      EvalSpec
       ParserSpec
       Paths_glados
   hs-source-dirs:
