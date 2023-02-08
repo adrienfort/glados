@@ -162,6 +162,7 @@ inferiorto _ _ = (Err "Invalid arguments to function <")
 
 
 isBuiltin :: [Ast] -> Env -> ReturnValue
+isBuiltin (AstLambda _ _:_) env = Bool "no"
 isBuiltin (AstSymbol a:b) env = case lookup a getBuiltins of
                     Nothing -> Bool "no"
                     Just bu -> bu b env
@@ -277,8 +278,8 @@ evaluate (a:[]) env = case eval a env of
 evaluate (a:b) env = case eval a env of
     (Environment nenv) -> evaluate b nenv
     (Error err) -> ([Error err], env)
-    (res) -> (res : result, nenv)
-    where (result, nenv) = evaluate b env
+    (res) -> (res : result, neenv)
+    where (result, neenv) = evaluate b env
 
 printEvaluation :: [Result] -> IO ()
 printEvaluation [] = return ()
