@@ -236,7 +236,6 @@ functionValue s env = case isBuiltin s env of
         (Err err) -> (Error err)
     (Bool a) -> (Bolean a)
     (Err err) -> (Error err)
-functionValue _ _ = (Error "Invalid function call")
 
 getSymbol :: String -> Env -> Result
 getSymbol str env = case getKeyValue str env of
@@ -267,7 +266,6 @@ eval (AstSymbol a) env = getSymbol a env
 eval (AstLambda _ _) _ = (Expression "lambda")
 eval (AstDefine a body) env = defineSymbol a body env
 eval (AstCall a) env = functionValue a env
-eval _ _ = (Error "Error")
 
 -- il faut return l'env et le resultat
 evaluate :: [Ast] -> Env -> ([Result], Env)
