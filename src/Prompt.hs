@@ -24,7 +24,7 @@ readInput a (s, e) env = case s == e of
     False -> getLine>>= \line ->
         readInput (a ++ " " ++ line)  (addTuple (countParenthesis (line) (0, 0)) (s, e)) env
     True -> printEvaluation (res) >> return ("", nenv)
-        where (res, nenv) = evaluate (cptToAst (parse a)) env
+        where (res, nenv) = evaluate (startCptToAst (parse a)) env
 
 prompt :: Env -> IO ()
 prompt env = isEOF >>= \eof -> case eof of

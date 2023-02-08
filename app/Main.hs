@@ -9,4 +9,4 @@ import Prompt
 main :: IO ()
 main = getArgs >>= \args -> case length args == 0 of
     True -> prompt []
-    False -> readFile (head args) >>= \content -> printEvaluation (fst (evaluate (cptToAst (parse content)) []))            
+    False -> readFile (head args) >>= \content -> printEvaluation (fst (evaluate (startCptToAst (parse content)) []))            

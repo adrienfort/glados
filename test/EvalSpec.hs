@@ -184,7 +184,7 @@ simpleLambda = do
 
     describe "Error handling lambda" $ do
         it "((lambda (x) (if (eq? x 1) 1 (* x (fact (- x 1)))))) 10)" $ do
-            eval (AstCall [AstLambda ["x"] (AstCall [AstSymbol "if", AstCall [AstSymbol "eq?", AstSymbol "x", AstInteger 1], AstInteger 1, AstCall [AstSymbol "*", AstSymbol "x", AstCall [AstSymbol "fact", AstCall [AstSymbol "-", AstSymbol "x", AstInteger 1]]]]), AstInteger 10]) [] `shouldBe` (Error "Bad call")
+            isResultError (eval (AstCall [AstLambda ["x"] (AstCall [AstSymbol "if", AstCall [AstSymbol "eq?", AstSymbol "x", AstInteger 1], AstInteger 1, AstCall [AstSymbol "*", AstSymbol "x", AstCall [AstSymbol "fact", AstCall [AstSymbol "-", AstSymbol "x", AstInteger 1]]]]), AstInteger 10]) []) `shouldBe` True
 
 advancedFunction :: Spec
 advancedFunction = do
