@@ -1,7 +1,12 @@
 module Main (main) where
 
+import System.Environment (getArgs)
+import CPT.Cpt
+import CptToAst
+import Eval
 import Prompt
 
 main :: IO ()
-main = do
-    prompt []
+main = getArgs >>= \args -> case length args == 0 of
+    True -> prompt []
+    False -> readFile (head args) >>= \content -> printEvaluation (fst (evaluate (cptToAst (parse (map (\c -> if c=='\n' then ' '; else c) content))) []))            
