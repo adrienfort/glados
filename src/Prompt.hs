@@ -22,10 +22,9 @@ addTuple (a1, b1) (a2, b2) = (a1 + a2, b1 + b2)
 readInput :: String -> (Int, Int) -> Env -> IO (String, Env)
 readInput a (s, e) env = case s == e of
     False -> getLine>>= \line ->
-        readInput (a ++ line)  (addTuple (countParenthesis (line ++ " ") (0, 0)) (s, e)) env
-    True -> case evaluate (cptToAst (parse a)) env of
-        (Environment nenv) -> return ("", nenv)
-        res -> return (show res, env)
+        readInput (a ++ " " ++ line)  (addTuple (countParenthesis (line) (0, 0)) (s, e)) env
+    True -> printEvaluation (res) >> return ("", nenv)
+        where (res, nenv) = evaluate (cptToAst (parse a)) env
 
 prompt :: Env -> IO ()
 prompt env = isEOF >>= \eof -> case eof of

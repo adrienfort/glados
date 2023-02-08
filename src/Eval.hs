@@ -269,13 +269,18 @@ eval (AstDefine a body) env = defineSymbol a body env
 eval (AstCall a) env = functionValue a env
 eval _ _ = (Error "Error")
 
-evaluate :: [Ast] -> Env -> Result
-evaluate [] _ = (Error "Invalid expression")
-evaluate (a:b) env = eval a env
--- evaluate (a:b) env = case eval a env of
-    -- (Environment nenv) -> evaluate b nenv
-    -- (Error err) -> [Error err]
-    -- (res) -> res : evaluate b env
+-- il faut return l'env et le resultat
+evaluate :: [Ast] -> Env -> ([Result], Env)
+evaluate [] env = ([Error "Invalid expression"], env)
+evaluate (a:[]) env = case eval a env of
+    (Environment nenv) -> ([], nenv)
+    (Error err) -> ([Error err], env)
+    (res) -> ([res], env)
+evaluate (a:b) env = case eval a env of
+    (Environment nenv) -> evaluate b nenv
+    (Error err) -> ([Error err], env)
+    (res) -> (res : result, nenv)
+    where (result, nenv) = evaluate b env
 
 printEvaluation :: [Result] -> IO ()
 printEvaluation [] = return ()
