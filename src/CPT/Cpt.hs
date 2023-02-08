@@ -28,12 +28,16 @@ parseTree s = case removeSpaces s of
     ('(':xs) -> do
         (cpts, rest) <- parseList xs
         return (CptLists cpts, rest)
+    (x:xs) | x == '-' && isDigit (head xs) -> do
+        (num, rest) <- parseInteger xs
+        return (CptInteger (negate num), rest)
     (x:xs) | isDigit x -> do
         (num, rest) <- parseInteger (x:xs)
         return (CptInteger num, rest)
     (x:xs) -> do
         let (symbol, rest) = parseSymbol (x:xs)
         if symbol == "" then parseTree rest else return (CptSymbols symbol, rest)
+
 
 parseList :: String -> Maybe ([Cpt], String)
 parseList s = case s of
