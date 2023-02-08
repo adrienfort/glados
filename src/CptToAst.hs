@@ -16,6 +16,7 @@ printAst ast = putStrLn (show ast)
 
 cptToAst :: Cpt -> [Ast]
 cptToAst cpt@(CptLists (CptLists ((CptSymbols "lambda"): _) : _)) = [cptToAstLine cpt]
+cptToAst (CptLists []) = []
 cptToAst (CptLists [CptLists a]) = [cptToAstLine (CptLists a)]
 cptToAst (CptLists (CptLists a : CptInteger b: c)) = cptToAstLine (CptLists a) : cptToAstLine (CptInteger b): cptToAst (CptLists c)
 cptToAst (CptLists (CptLists a : CptSymbols b: c)) = cptToAstLine (CptLists a) : cptToAstLine (CptSymbols b): cptToAst (CptLists c)
