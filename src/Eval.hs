@@ -162,6 +162,7 @@ inferiorto _ _ = (Err "Invalid arguments to function <")
 
 
 isBuiltin :: [Ast] -> Env -> ReturnValue
+isBuiltin (AstLambda _ _:_) env = Bool "no"
 isBuiltin (AstSymbol a:b) env = case lookup a getBuiltins of
                     Nothing -> Bool "no"
                     Just bu -> bu b env
@@ -236,7 +237,6 @@ functionValue s env = case isBuiltin s env of
         (Err err) -> (Error err)
     (Bool a) -> (Bolean a)
     (Err err) -> (Error err)
-functionValue _ _ = (Error "Invalid function call")
 
 getSymbol :: String -> Env -> Result
 getSymbol str env = case getKeyValue str env of
@@ -267,7 +267,6 @@ eval (AstSymbol a) env = getSymbol a env
 eval (AstLambda _ _) _ = (Expression "lambda")
 eval (AstDefine a body) env = defineSymbol a body env
 eval (AstCall a) env = functionValue a env
-eval _ _ = (Error "Error")
 
 -- il faut return l'env et le resultat
 evaluate :: [Ast] -> Env -> ([Result], Env)
@@ -279,8 +278,8 @@ evaluate (a:[]) env = case eval a env of
 evaluate (a:b) env = case eval a env of
     (Environment nenv) -> evaluate b nenv
     (Error err) -> ([Error err], env)
-    (res) -> (res : result, nenv)
-    where (result, nenv) = evaluate b env
+    (res) -> (res : result, neenv)
+    where (result, neenv) = evaluate b env
 
 printEvaluation :: [Result] -> IO ()
 printEvaluation [] = return ()

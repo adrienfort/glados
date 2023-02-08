@@ -1,4 +1,4 @@
-module EasyEvalSpec (spec) where
+module EvalSpec (spec) where
 
 import Test.Hspec
 import Eval
@@ -8,8 +8,8 @@ isResultError :: Result -> Bool
 isResultError (Error _) = True
 isResultError _ = False
 
-spec :: Spec
-spec = do
+simpleSingleEvaluationSpec :: Spec
+simpleSingleEvaluationSpec = do
     describe "Simple single evaluation" $ do
         it "(define x 2)" $ do
             eval (AstDefine (Left "x") (AstInteger 2)) [] `shouldBe` (Environment [("x", (AstInteger 2))])
@@ -20,7 +20,9 @@ spec = do
         it "#t" $ do
             eval (AstBoolean "#t") [] `shouldBe` (Bolean "#t")
 
-    describe "Simple define Astsymbol" $ do
+simpleDefineSymbolSpec :: Spec
+simpleDefineSymbolSpec = do
+    describe "Simple define symbol" $ do
         it "(define x 2) x" $ do
             let env = eval (AstDefine (Left "x") (AstInteger 2)) []
             eval (AstSymbol "x") (getEnv env) `shouldBe` (Value 2)
@@ -28,10 +30,12 @@ spec = do
             let env = eval (AstDefine (Left "x") (AstBoolean "#t")) []
             eval (AstSymbol "x") (getEnv env) `shouldBe` (Bolean "#t")
 
-    describe "Simple define Astsymbol error handling" $ do
+    describe "Simple define symbol error handling" $ do
         it "x" $ do
             isResultError(eval (AstSymbol "x") []) `shouldBe` True
 
+simpleDefineFunction :: Spec
+simpleDefineFunction = do
     describe "Simple define Function" $ do
         it "(define (x) 2) x" $ do
             let env = eval (AstDefine (Right ["x"]) (AstInteger 2)) []
@@ -49,7 +53,9 @@ spec = do
             let env = eval (AstDefine (Right ["x"]) (AstDefine (Left "a") (AstInteger 2))) []
             isResultError (eval (AstCall [AstSymbol "x"]) (getEnv env)) `shouldBe` True
 
-    describe "Builtins Astcall" $ do
+builtinsCorrectCall :: Spec
+builtinsCorrectCall = do
+    describe "Builtins call" $ do
         it "(* 2 3)" $ do
             eval (AstCall [AstSymbol "*", AstInteger 2, AstInteger 3]) [] `shouldBe` (Value 6)
         it "(* 3 2)" $ do
@@ -111,6 +117,8 @@ spec = do
         it "(eq? 1 -1)" $ do
             eval (AstCall [AstSymbol "eq?", AstInteger 1, AstInteger (-1)]) [] `shouldBe` (Bolean "#f")
 
+builtinsBadCall :: Spec
+builtinsBadCall = do
     describe "Builtins error handling" $ do
         it "(* 2)" $ do
             isResultError (eval (AstCall [AstSymbol "*", AstInteger 2]) []) `shouldBe` True
@@ -143,6 +151,8 @@ spec = do
         it "(toto)" $ do
             isResultError (eval (AstCall [AstSymbol "toto"]) []) `shouldBe` True
 
+ifFunctionCall :: Spec
+ifFunctionCall = do
     describe "If function" $ do
         it "(if #t 1 2)" $ do
             eval (AstCall [AstSymbol "if", AstBoolean "#t", AstInteger 1, AstInteger 2]) [] `shouldBe` (Value 1)
@@ -159,6 +169,8 @@ spec = do
         it "(if 1 1 2)" $ do
             isResultError (eval (AstCall [AstSymbol "if", AstBoolean "#t", AstInteger 1]) []) `shouldBe` True
 
+simpleLambda :: Spec
+simpleLambda = do
     describe "Lambdas" $ do
         it "(define add (lambda () 12)) (add)" $ do
             let env = eval (AstDefine (Left "add") (AstLambda [] (AstInteger 12))) []
@@ -170,26 +182,48 @@ spec = do
             let env = eval (AstDefine (Left "add") (AstLambda ["a", "b"] (AstCall [AstSymbol "+", AstSymbol "a", AstSymbol "b"]))) []
             eval (AstCall [AstSymbol "add", AstInteger 3, AstInteger 4]) (getEnv env) `shouldBe` (Value 7)
 
+    describe "Error handling lambda" $ do
+        it "((lambda (x) (if (eq? x 1) 1 (* x (fact (- x 1)))))) 10)" $ do
+            isResultError (eval (AstCall [AstLambda ["x"] (AstCall [AstSymbol "if", AstCall [AstSymbol "eq?", AstSymbol "x", AstInteger 1], AstInteger 1, AstCall [AstSymbol "*", AstSymbol "x", AstCall [AstSymbol "fact", AstCall [AstSymbol "-", AstSymbol "x", AstInteger 1]]]]), AstInteger 10]) []) `shouldBe` True
+
+advancedFunction :: Spec
+advancedFunction = do
     describe "Advanced functions" $ do
         it "(define (> a b) (if (eq? a b) #f (if (< a b) #f #t))) (> 10 -2)" $ do
             let env = eval (AstDefine (Right [">", "a", "b"]) (AstCall [AstSymbol "if", AstCall [AstSymbol "eq?", AstSymbol "a", AstSymbol "b"], AstBoolean "#f", AstCall [AstSymbol "if", AstCall [AstSymbol "<", AstSymbol "a", AstSymbol "b"], AstBoolean "#f", AstBoolean "#t"]])) []
             eval (AstCall [AstSymbol ">", AstInteger 10, AstInteger (-2)]) (getEnv env) `shouldBe` (Bolean "#t")
 
+advancedLambda :: Spec
+advancedLambda = do
     describe "Advanced lambdas functions" $ do
         it "(define > (lambda (a b) (if (eq? a b) #f (if (< a b) #f #t))) (> 10 -2)" $ do
             let env = eval (AstDefine (Left ">") (AstLambda ["a", "b"] (AstCall [AstSymbol "if", AstCall [AstSymbol "eq?", AstSymbol "a", AstSymbol "b"], AstBoolean "#f", AstCall [AstSymbol "if", AstCall [AstSymbol "<", AstSymbol "a", AstSymbol "b"], AstBoolean "#f", AstBoolean "#t"]]))) []
             eval (AstCall [AstSymbol ">", AstInteger 10, AstInteger (-2)]) (getEnv env) `shouldBe` (Bolean "#t")
 
+recursiveFunction :: Spec
+recursiveFunction = do
     describe "Recursive functions" $ do
         it "(define (fact x) (if (eq? x 1) 1 (* x (fact (- x 1))))) (fact 10)" $ do
             let env = eval (AstDefine (Right ["fact", "x"]) (AstCall [AstSymbol "if", AstCall [AstSymbol "eq?", AstSymbol "x", AstInteger 1], AstInteger 1, AstCall [AstSymbol "*", AstSymbol "x", AstCall [AstSymbol "fact", AstCall [AstSymbol "-", AstSymbol "x", AstInteger 1]]]])) []
             eval (AstCall [AstSymbol "fact", AstInteger 10]) (getEnv env) `shouldBe` (Value 3628800)
 
+recursiveLambda :: Spec
+recursiveLambda = do
     describe "Recursive lambdas" $ do
         it "(define fact (lambda (x) (if (eq? x 1) 1 (* x (fact (- x 1)))))) (fact 10)" $ do
             let env = eval (AstDefine (Left "fact") (AstLambda ["x"] (AstCall [AstSymbol "if", AstCall [AstSymbol "eq?", AstSymbol "x", AstInteger 1], AstInteger 1, AstCall [AstSymbol "*", AstSymbol "x", AstCall [AstSymbol "fact", AstCall [AstSymbol "-", AstSymbol "x", AstInteger 1]]]]))) []
             eval (AstCall [AstSymbol "fact", AstInteger 10]) (getEnv env) `shouldBe` (Value 3628800)
 
-    describe "Error handling lambda" $ do
-        it "((lambda (x) (if (eq? x 1) 1 (* x (fact (- x 1)))))) 10)" $ do
-            eval (AstCall [AstLambda ["x"] (AstCall [AstSymbol "if", AstCall [AstSymbol "eq?", AstSymbol "x", AstInteger 1], AstInteger 1, AstCall [AstSymbol "*", AstSymbol "x", AstCall [AstSymbol "fact", AstCall [AstSymbol "-", AstSymbol "x", AstInteger 1]]]]), AstInteger 10]) [] `shouldBe` (Error "Bad call")
+spec :: Spec
+spec = do
+    simpleSingleEvaluationSpec
+    simpleDefineSymbolSpec
+    simpleDefineFunction
+    builtinsCorrectCall
+    builtinsBadCall
+    ifFunctionCall
+    simpleLambda
+    advancedFunction
+    advancedLambda
+    recursiveFunction
+    recursiveLambda
