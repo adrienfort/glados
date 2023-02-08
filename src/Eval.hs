@@ -236,7 +236,6 @@ functionValue s env = case isBuiltin s env of
         (Err err) -> (Error err)
     (Bool a) -> (Bolean a)
     (Err err) -> (Error err)
-functionValue _ _ = (Error "Invalid function call")
 
 getSymbol :: String -> Env -> Result
 getSymbol str env = case getKeyValue str env of
@@ -267,14 +266,19 @@ eval (AstSymbol a) env = getSymbol a env
 eval (AstLambda _ _) _ = (Expression "lambda")
 eval (AstDefine a body) env = defineSymbol a body env
 eval (AstCall a) env = functionValue a env
-eval _ _ = (Error "Error")
 
-evaluate :: [Ast] -> Env -> [Result]
-evaluate [] _ = []
+-- il faut return l'env et le resultat
+evaluate :: [Ast] -> Env -> ([Result], Env)
+evaluate [] env = ([Error "Invalid expression"], env)
+evaluate (a:[]) env = case eval a env of
+    (Environment nenv) -> ([], nenv)
+    (Error err) -> ([Error err], env)
+    (res) -> ([res], env)
 evaluate (a:b) env = case eval a env of
     (Environment nenv) -> evaluate b nenv
-    (Error err) -> [Error err]
-    (res) -> res : evaluate b env
+    (Error err) -> ([Error err], env)
+    (res) -> (res : result, nenv)
+    where (result, nenv) = evaluate b env
 
 printEvaluation :: [Result] -> IO ()
 printEvaluation [] = return ()

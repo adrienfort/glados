@@ -30,6 +30,7 @@ library
       CptToAst
       Eval
       Lib
+      Prompt
   other-modules:
       Paths_glados
   hs-source-dirs:
@@ -57,7 +58,7 @@ test-suite glados-test
   other-modules:
       CptSpec
       CptToAstSpec
-      EasyEvalSpec
+      EvalSpec
       ParserSpec
       Paths_glados
   hs-source-dirs:

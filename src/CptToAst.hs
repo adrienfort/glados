@@ -4,7 +4,6 @@ module CptToAst (
   printCpt,
   printAst,
   cptToAst,
-  startCptToAst
 ) where
 
 import Lib
@@ -17,14 +16,12 @@ printAst ast = putStrLn (show ast)
 
 cptToAst :: Cpt -> [Ast]
 cptToAst cpt@(CptLists (CptLists ((CptSymbols "lambda"): _) : _)) = [cptToAstLine cpt]
+cptToAst (CptLists []) = []
 cptToAst (CptLists [CptLists a]) = [cptToAstLine (CptLists a)]
-cptToAst (CptLists (CptLists a : b)) = [cptToAstLine (CptLists a)] ++ cptToAst (CptLists b)
+cptToAst (CptLists (CptLists a : CptInteger b: c)) = cptToAstLine (CptLists a) : cptToAstLine (CptInteger b): cptToAst (CptLists c)
+cptToAst (CptLists (CptLists a : CptSymbols b: c)) = cptToAstLine (CptLists a) : cptToAstLine (CptSymbols b): cptToAst (CptLists c)
+cptToAst (CptLists (CptLists a : b)) = cptToAstLine (CptLists a) : cptToAst (CptLists b)
 cptToAst cpt = [cptToAstLine cpt]
-
-startCptToAst :: Cpt -> [Ast]
-startCptToAst (CptLists []) = []
-startCptToAst (CptLists (a:b)) = cptToAst a ++ startCptToAst (CptLists b)
-startCptToAst _ = []
 
 cptToAstLine :: Cpt -> Ast
 cptToAstLine (CptInteger i) = AstInteger i
