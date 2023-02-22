@@ -47,3 +47,9 @@ instance Eq Cpt where
     (CptSymbols s1) == (CptSymbols s2) = s1 == s2
     (CptInteger i1) == (CptInteger i2) = i1 == i2
     _ == _ = False
+
+data Instruction = Instruction {
+    line :: Int,
+    command :: String,
+    value :: Ast
+}

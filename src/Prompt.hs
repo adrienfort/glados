@@ -8,6 +8,7 @@ import System.IO
 import CPT.Cpt
 import CptToAst
 import Eval
+import Lib
 
 
 countParenthesis :: String -> (Int, Int) -> (Int, Int)
@@ -19,19 +20,20 @@ countParenthesis (_:b) e = countParenthesis b e
 addTuple :: (Int, Int) -> (Int, Int) -> (Int, Int)
 addTuple (a1, b1) (a2, b2) = (a1 + a2, b1 + b2)
 
-readInput :: String -> (Int, Int) -> Env -> IO (String, Env)
-readInput a (s, e) env = case s == e of
-    False -> getLine>>= \line ->
-        readInput (a ++ " " ++ line)  (addTuple (countParenthesis (line) (0, 0)) (s, e)) env
-    True -> printEvaluation (res) >> return ("", nenv)
-        where (res, nenv) = evaluate (startCptToAst (parse a)) env
+-- readInput :: String -> (Int, Int) -> Env -> IO (String, Env)
+-- readInput a (s, e) env = case s == e of
+    -- False -> getLine>>= \line ->
+        -- readInput (a ++ " " ++ line)  (addTuple (countParenthesis (line) (0, 0)) (s, e)) env
+    -- True -> printEvaluation (res) >> return ("", nenv)
+        -- where (res, nenv) = evaluate (startCptToAst (parse a)) env
 
 prompt :: Env -> IO ()
-prompt env = isEOF >>= \eof -> case eof of
-    True -> return ()
-    False -> getLine >>= \line ->
-        readInput line (countParenthesis line (0, 0)) env
-        >>= \result -> case result of
-            (out, nenv) -> case out of
-                "" -> prompt nenv
-                a -> putStrLn a >> prompt nenv
+prompt env = return ()
+-- prompt env = isEOF >>= \eof -> case eof of
+    -- True -> return ()
+    -- False -> getLine >>= \line ->
+        -- readInput line (countParenthesis line (0, 0)) env
+        -- >>= \result -> case result of
+            -- (out, nenv) -> case out of
+                -- "" -> prompt nenv
+                -- a -> putStrLn a >> prompt nenv
