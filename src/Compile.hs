@@ -1,26 +1,66 @@
 module Compile
     (
+        compile
     ) where
 
 import Lib
 
-data Ast = Integer Int | Symbol String | Boolean Bool | Call [Ast] | Define (Either String [String]) Ast | Lambda [String] Ast
+-- astListsToInstructions :: [Ast] -> Int -> ((Either [Instruction] String), Int)
+-- astListsToInstructions [] i = (Left [], i)
+-- astListsToInstructions (a:b) i = case astToInstructions a i of
+    -- (Right err, _) -> (Right err, i)
+    -- (Left il, index) -> case astListsToInstructions b (index + 1) of
+        -- (Right err, _) -> (Right err, index)
+        -- (Left res, ind) -> (Left (il ++ res), ind + 1)
 
-astToInstructions :: Ast -> (Either [Instruction] String)
-astToInstructions _ = (Right "b")
+-- Return :
+--  List of instruction OR error
+--  Index of the last line + 1
 
--- Ast | Env | String
-compileExpression :: Ast -> (Either [Instruction] String)
-compileExpression (Call (Symbol "if":b)) = (Right "if")
-compileExpression a = (Right "normal")
--- last => recupere la derniere node
--- call astToInstructions and add a return at the end
--- exception for if (if don't need return at the end, it has already one)
+-- define
+-- lambda
+-- call
+astToInstructions :: Ast -> Int -> ((Either [Instruction] String), Int)
+astToInstructions (AstCall (AstSymbol "if":b)) i = ifToInstructions 0 (AstCall (AstSymbol "if":b)) i
+astToInstructions (AstSymbol a) i = (Left [Instruction {line = i, command = "get", value = Just (AstSymbol a)}], i + 1)
+astToInstructions a i = (Left [Instruction {line = i, command = "push", value = Just a}], i + 1)
 
-compile :: [Ast] -> (Either [Instruction] String)
-compile [] = (Left [])
-compile (a:b) = case compileExpression a of
-    (Right b) -> (Right b)
-    (Left a) -> case compile b of
-        (Left res) -> (Left (a ++ res))
-        (Right err) -> (Right err)
+ifToInstructions :: Int -> Ast -> Int -> ((Either [Instruction] String), Int)
+ifToInstructions r (AstCall (_:cond:yes:no:[])) i = case r of
+    -- return
+    1 -> (ifList [
+        lcond, (Left [Instruction {line = ic, command = "jumpIfFalse", value = Just (AstInteger (iy + 1))}]),
+        lyes, Left [Instruction {line = iy, command = "return", value = Nothing}],
+        lno, Left [Instruction {line = ino, command = "return", value = Nothing}]
+        ], ino + 1)
+    -- no return
+    0 -> (ifList [
+        lcond, (Left [Instruction {line = ic, command = "jumpIfFalse", value = Just (AstInteger (iy + 1))}]),
+        lyes,
+        lno
+        ], ino + 1)
+    where
+        (lcond, ic) = astToInstructions cond i -- cond 
+        (lyes, iy) = astToInstructions yes (ic + 1) -- cond + jump + true
+        (lno, ino) = astToInstructions no (iy + r) -- cond + jump + true + (return ?) + false
+        ifList :: [(Either [Instruction] String)] -> (Either [Instruction] String)
+        ifList [] = Left []
+        ifList (a:b) = case a of
+            (Left il) -> case ifList b of
+                (Left ret) -> Left (il ++ ret)
+                Right err -> Right err
+            Right err -> Right err
+
+compileExpression :: Ast -> Int -> ((Either [Instruction] String), Int)
+compileExpression (AstCall (AstSymbol "if":b)) i = ifToInstructions 1 (AstCall (AstSymbol "if":b)) i
+compileExpression a i = case astToInstructions a i of
+    (Right err, _) -> (Right err, i)
+    (Left il, index) -> (Left (il ++ [Instruction {line = index + 1, command = "return", value = Nothing}]), index + 1)
+
+compile :: [Ast] -> Int -> (Either [Instruction] String)
+compile [] _ = (Left [])
+compile (a:b) i = case compileExpression a i of
+    (Right b, _) -> (Right b)
+    (Left x, index) -> case compile b (index + 1) of
+        (Left res) -> (Left (x ++ res))
+        Right err -> Right err

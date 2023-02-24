@@ -1,11 +1,17 @@
-module Lib (Cpt (..), Ast (..), Env) where
+module Lib (
+        Cpt (..),
+        Ast (..),
+        Env,
+        Instruction (..)
+    ) where
 
 data Ast = AstInteger Int
     | AstSymbol String
     | AstBoolean String
+    | AstDefine (Either Ast [Ast]) Ast
     | AstCall [Ast]
-    | AstDefine (Either String [String]) Ast
-    | AstLambda [String] Ast deriving (Show)
+    | AstLambda [Ast] Ast
+    deriving (Show)
 
 type Env = [(String, Ast)]
 
@@ -26,8 +32,9 @@ instance Eq Ast where
     (AstSymbol n1) == (AstSymbol n2) = n1 == n2
     (AstBoolean n1) == (AstBoolean n2) = n1 == n2
     (AstCall s1) == (AstCall s2) = s1 == s2
-    (AstDefine (Left s1) n1) == (AstDefine (Left s2) n2) = s1 == s2 && n1 == n2
-    (AstDefine (Right s1) n1) == (AstDefine (Right s2) n2) = s1 == s2 && n1 == n2
+    (AstDefine s1 n1) == (AstDefine s2 n2) = s1 == s2 && n1 == n2
+    -- (AstDefine (Left s1) n1) == (AstDefine (Left s2) n2) = s1 == s2 && n1 == n2
+    -- (AstDefine (Right s1) n1) == (AstDefine (Right s2) n2) = s1 == s2 && n1 == n2
     (AstLambda s1 n1) == (AstLambda s2 n2) = s1 == s2 && n1 == n2
     _ == _ = False
 
@@ -51,5 +58,5 @@ instance Eq Cpt where
 data Instruction = Instruction {
     line :: Int,
     command :: String,
-    value :: Ast
-}
+    value :: Maybe Ast
+} deriving (Show, Eq)
