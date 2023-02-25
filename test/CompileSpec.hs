@@ -20,12 +20,12 @@ compileIfSpec = do
                     Instruction {line = 5, command = "return", value = Nothing}
                     ])
         it "(define x (if #t 1 0))" $ do
-            compile [(AstDefine (Left (AstSymbol "x")) (AstCall [AstSymbol "if", AstBoolean "#t", AstInteger 1, AstInteger 0]))] 0 `shouldBe` (Left [
+            compile [(AstDefine (Left "x") (AstCall [AstSymbol "if", AstBoolean "#t", AstInteger 1, AstInteger 0]))] 0 `shouldBe` (Left [
                     Instruction {line = 0, command = "push", value = Just (AstBoolean "#t")},
                     Instruction {line = 1, command = "jumpIfFalse", value = Just (AstInteger 3)},
                     Instruction {line = 2, command = "push", value = Just (AstInteger 1)},
                     Instruction {line = 3, command = "push", value = Just (AstInteger 0)},
-                    Instruction {line = 4, command = "call", value = Just (AstDefine (Left (AstSymbol "x")) (AstCall [AstSymbol "if", AstBoolean "#t", AstInteger 1, AstInteger 0]))},
+                    Instruction {line = 4, command = "call", value = Just (AstDefine (Left "x") (AstCall [AstSymbol "if", AstBoolean "#t", AstInteger 1, AstInteger 0]))},
                     Instruction {line = 5, command = "return", value = Nothing}
                     ])
 
@@ -62,14 +62,14 @@ compileSimpleExpressionSpec = do
                 Instruction {line = 17, command = "return", value = Nothing}
                 ])
         it "(lambda (x) 2)" $ do
-            compile [AstLambda [AstSymbol "x"] (AstInteger 2)] 0 `shouldBe` (Left [
-                Instruction {line = 0, command = "push", value = Just (AstLambda [AstSymbol "x"] (AstInteger 2))},
+            compile [AstLambda ["x"] (AstInteger 2)] 0 `shouldBe` (Left [
+                Instruction {line = 0, command = "push", value = Just (AstLambda ["x"] (AstInteger 2))},
                 Instruction {line = 1, command = "return", value = Nothing}
                 ])
         it "(define x 5)" $ do
-            compile [AstDefine (Left (AstSymbol "x")) (AstInteger 5)] 0 `shouldBe` (Left [
+            compile [AstDefine (Left "x") (AstInteger 5)] 0 `shouldBe` (Left [
                 Instruction {line = 0, command = "push", value = Just (AstInteger 5)},
-                Instruction {line = 1, command = "call", value = Just (AstDefine (Left (AstSymbol "x")) (AstInteger 5))},
+                Instruction {line = 1, command = "call", value = Just (AstDefine (Left "x") (AstInteger 5))},
                 Instruction {line = 2, command = "return", value = Nothing}
                 ])
 

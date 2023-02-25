@@ -8,9 +8,9 @@ module Lib (
 data Ast = AstInteger Int
     | AstSymbol String
     | AstBoolean String
-    | AstDefine (Either Ast [Ast]) Ast
+    | AstDefine (Either String [String]) Ast
     | AstCall [Ast]
-    | AstLambda [Ast] Ast
+    | AstLambda [String] Ast
     deriving (Show)
 
 type Env = [(String, Ast)]
