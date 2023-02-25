@@ -29,7 +29,7 @@ callToInstructions _ i = (Right "? invalid call", i)
 astToInstructions :: Ast -> Int -> ((Either [Instruction] String), Int)
 astToInstructions (AstDefine a v) i = case astToInstructions v i of
     (Right err, ni) -> (Right err, ni)
-    (li, ni) -> addInstruction li Instruction {line = ni, command = "call", value = Just (AstDefine a v)}
+    (li, ni) -> addInstruction li Instruction {line = ni, command = "call", value = Just (AstDefine a (AstSymbol ""))} -- a changer si probleme
 astToInstructions (AstCall (AstSymbol "if":b)) i = ifToInstructions 0 (AstCall (AstSymbol "if":b)) i
 astToInstructions (AstCall (a:b)) i = case callToInstructions (AstCall (a:b)) i of
     (Right err, ni) -> (Right err, ni)
@@ -44,7 +44,7 @@ ifToInstructions r (AstCall (_:cond:yes:no:[])) i = case r of
         lcond, (Left [Instruction {line = ic, command = "jumpIfFalse", value = Just (AstInteger (iy + r))}]),
         lyes, Left [Instruction {line = iy, command = "return", value = Nothing}],
         lno, Left [Instruction {line = ino, command = "return", value = Nothing}]
-        ], ino + 1)
+        ], ino)
     -- no return
     0 -> (ifList [
         lcond, (Left [Instruction {line = ic, command = "jumpIfFalse", value = Just (AstInteger (iy + r))}]),
@@ -69,12 +69,12 @@ compileExpression :: Ast -> Int -> ((Either [Instruction] String), Int)
 compileExpression (AstCall (AstSymbol "if":b)) i = ifToInstructions 1 (AstCall (AstSymbol "if":b)) i
 compileExpression a i = case astToInstructions a i of
     (Right err, _) -> (Right err, i)
-    (Left il, index) -> (Left (il ++ [Instruction {line = index, command = "return", value = Nothing}]), index + 1)
+    (Left il, index) -> (Left (il ++ [Instruction {line = index, command = "return", value = Nothing}]), index)
 
-compile :: [Ast] -> Int -> (Either [Instruction] String)
-compile [] _ = (Left [])
+compile :: [Ast] -> Int -> ((Either [Instruction] String), Int)
+compile [] i = (Left [], i)
 compile (a:b) i = case compileExpression a i of
-    (Right err, _) -> (Right err)
+    (Right err, ni) -> (Right err, ni)
     (Left x, index) -> case compile b (index + 1) of
-        (Left res) -> (Left (x ++ res))
-        Right err -> Right err
+        (Left res, ni) -> (Left (x ++ res), ni)
+        (Right err, ni) -> (Right err, ni)
