@@ -4,7 +4,8 @@ module Lib (
         Env,
         Instruction (..),
         IEnv,
-        insertToTupleArray
+        insertToTupleArray,
+        addToTupleArray
     ) where
 
 data Ast = AstInteger Int
@@ -72,3 +73,6 @@ insertToTupleArray list str v = case lookup str list of
             replaceKey [] = []
             replaceKey ((s, val) : b) | s == str = ((str, v) : b)
                                     | otherwise = ((s, val) : (replaceKey b))
+
+addToTupleArray :: [(String, a)] -> String -> a -> [(String, a)]
+addToTupleArray list str a = (str, a) : list
