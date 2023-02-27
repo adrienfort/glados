@@ -80,7 +80,12 @@ countLetters str = (length $ filter (== '(') str) == (length $ filter (== ')') s
 removeComments :: String -> String
 removeComments = unlines . map (takeWhile (/= '#')) . lines
 
+replaceEquals :: String -> String
+replaceEquals [] = []
+replaceEquals ('=':rest) = "define" ++ replaceEquals rest
+replaceEquals (c:rest) = c : replaceEquals rest
+
 parse :: String -> Cpt
 parse s = case countLetters s of
-    True  -> parseSourceCode $ removeComments s
+    True  -> parseSourceCode $ (replaceEquals $ removeComments s)
     False -> CptLists []
