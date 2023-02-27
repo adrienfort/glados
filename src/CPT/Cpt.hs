@@ -77,7 +77,10 @@ flatten cpt = cpt
 countLetters :: String -> Bool
 countLetters str = (length $ filter (== '(') str) == (length $ filter (== ')') str)
 
+removeComments :: String -> String
+removeComments = unlines . map (takeWhile (/= '#')) . lines
+
 parse :: String -> Cpt
 parse s = case countLetters s of
-    True  -> parseSourceCode s
+    True  -> parseSourceCode $ removeComments s
     False -> CptLists []
