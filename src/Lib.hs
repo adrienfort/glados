@@ -2,7 +2,9 @@ module Lib (
         Cpt (..),
         Ast (..),
         Env,
-        Instruction (..)
+        Instruction (..),
+        IEnv,
+        insertToTupleArray
     ) where
 
 data Ast = AstInteger Int
@@ -15,6 +17,7 @@ data Ast = AstInteger Int
 
 type Env = [(String, Ast)]
 
+type IEnv = [(String, ([String], [Instruction]))]
 -- instance Show Ast where
     -- show (AstInteger n) = show n
     -- show (AstSymbol n) = n
@@ -60,3 +63,12 @@ data Instruction = Instruction {
     command :: String,
     value :: Maybe Ast
 } deriving (Show, Eq)
+
+insertToTupleArray :: [(String, a)] -> String -> a -> [(String, a)]
+insertToTupleArray list str v = case lookup str list of
+    Nothing -> (str, v) : list
+    Just _ -> replaceKey list
+        where
+            replaceKey [] = []
+            replaceKey ((s, val) : b) | s == str = ((str, v) : b)
+                                    | otherwise = ((s, val) : (replaceKey b))

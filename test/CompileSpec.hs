@@ -21,13 +21,9 @@ compileIfSpec = do
                     ], 6)
         it "(define x (if #t 1 0))" $ do
             compile [(AstDefine (Left "x") (AstCall [AstSymbol "if", AstBoolean "#t", AstInteger 1, AstInteger 0]))] 0 `shouldBe` (Left [
-                    Instruction {line = 0, command = "push", value = Just (AstBoolean "#t")},
-                    Instruction {line = 1, command = "jumpIfFalse", value = Just (AstInteger 3)},
-                    Instruction {line = 2, command = "push", value = Just (AstInteger 1)},
-                    Instruction {line = 3, command = "push", value = Just (AstInteger 0)},
-                    Instruction {line = 4, command = "call", value = Just (AstDefine (Left "x") (AstSymbol ""))},
-                    Instruction {line = 5, command = "return", value = Nothing}
-                    ], 6)
+                    Instruction {line = 0, command = "define", value = Just (AstDefine (Left "x") (AstCall [AstSymbol "if", AstBoolean "#t", AstInteger 1, AstInteger 0]))},
+                    Instruction {line = 1, command = "return", value = Nothing}
+                    ], 2)
 
 
 compileSimpleExpressionSpec :: Spec
@@ -68,10 +64,9 @@ compileSimpleExpressionSpec = do
                 ], 2)
         it "(define x 5)" $ do
             compile [AstDefine (Left "x") (AstInteger 5)] 0 `shouldBe` (Left [
-                Instruction {line = 0, command = "push", value = Just (AstInteger 5)},
-                Instruction {line = 1, command = "call", value = Just (AstDefine (Left "x") (AstSymbol ""))},
-                Instruction {line = 2, command = "return", value = Nothing}
-                ], 3)
+                Instruction {line = 0, command = "define", value = Just (AstDefine (Left "x") (AstInteger 5))},
+                Instruction {line = 1, command = "return", value = Nothing}
+                ], 2)
 
 compileHardSpec :: Spec
 compileHardSpec = do
@@ -95,6 +90,15 @@ compileHardSpec = do
                 Instruction {line = 14, command = "call", value = Just (AstSymbol "fact")},
                 Instruction {line = 15, command = "return", value = Nothing}
                 ], 16)
+        
+
+-- (if (n < 1) n (+ (fib n-1) (fib n-2))
+        -- int fib(int n)
+        -- {
+            -- if (n <= 1)
+                -- return n;
+            -- return fib(n - 1) + fib(n - 2);
+        -- }
 
 spec :: Spec
 spec = do
