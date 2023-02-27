@@ -80,6 +80,32 @@ compileSimpleExpressionSpec = do
 compileHardSpec :: Spec
 compileHardSpec = do
     describe "hard test" $ do
+        it "(define fact (lambda (x) (if (eq? x 1) 1 (* x (fact (- x 1)))))) (fact 10)" $ do
+            compile [
+                AstDefine (Left "fact") (AstLambda ["x"] (AstCall [AstSymbol "if", AstCall [AstSymbol "eq?", AstSymbol "x", AstInteger 1], AstInteger 1, AstCall [AstSymbol "*", AstSymbol "x", AstCall [AstSymbol "fact", AstCall [AstSymbol "-", AstSymbol "x", AstInteger 1]]]])),
+                AstCall [AstSymbol "fact", AstInteger 10]] 0 []
+                `shouldBe` (Left [
+                Instruction {line = 0, command = "push", value = Just (AstInteger 10)},
+                Instruction {line = 1, command = "call", value = Just (AstSymbol "fact")},
+                Instruction {line = 2, command = "return", value = Nothing}
+                ], 3, [
+                    ("fact", (["x"],
+                    [
+                        Instruction {line = 0, command = "get", value = Just (AstSymbol "x")},
+                        Instruction {line = 1, command = "push", value = Just (AstInteger 1)},
+                        Instruction {line = 2, command = "call", value = Just (AstSymbol "eq?")},
+                        Instruction {line = 3, command = "jumpIfFalse", value = Just (AstInteger 6)},
+                        Instruction {line = 4, command = "push", value = Just (AstInteger 1)},
+                        Instruction {line = 5, command = "return", value = Nothing},
+                        Instruction {line = 6, command = "get", value = Just (AstSymbol "x")}, -- pop *
+                        Instruction {line = 7, command = "get", value = Just (AstSymbol "x")}, -- pop -
+                        Instruction {line = 8, command = "push", value = Just (AstInteger 1)}, -- pop -
+                        Instruction {line = 9, command = "call", value = Just (AstSymbol "-")}, -- pop 2 | pop fact
+                        Instruction {line = 10, command = "call", value = Just (AstSymbol "fact")}, -- pop 1 | pop *
+                        Instruction {line = 11, command = "call", value = Just (AstSymbol "*")}, -- pop 2
+                        Instruction {line = 12, command = "return", value = Nothing}
+                    ])
+                )])
         it "(define (fact x) (if (eq? x 1) 1 (* x (fact (- x 1))))) (fact 10)" $ do
             compile [AstDefine (Right ["fact", "x"]) (AstCall [AstSymbol "if", AstCall [AstSymbol "eq?", AstSymbol "x", AstInteger 1], AstInteger 1, AstCall [AstSymbol "*", AstSymbol "x", AstCall [AstSymbol "fact", AstCall [AstSymbol "-", AstSymbol "x", AstInteger 1]]]]), AstCall [AstSymbol "fact", AstInteger 10]] 0 [] `shouldBe` (Left [
                 Instruction {line = 0, command = "push", value = Just (AstInteger 10)},
