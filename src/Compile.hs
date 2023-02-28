@@ -40,18 +40,13 @@ astToInstructions a i env = (Left [Instruction {line = i, command = "push", valu
 
 ifToInstructions :: Int -> Ast -> Int -> IEnv -> ((Either [Instruction] String), Int, IEnv)
 ifToInstructions r (AstCall (_:cond:yes:no:[])) i env = case r of
-    -- return
     1 -> (ifList [
         lcond, (Left [Instruction {line = ic, command = "jumpIfFalse", value = Just (AstInteger (iy + r))}]),
         lyes, Left [Instruction {line = iy, command = "return", value = Nothing}],
-        lno, Left [Instruction {line = ino, command = "return", value = Nothing}]
-        ], ino + 1, nenv)
-    -- no return
+        lno, Left [Instruction {line = ino, command = "return", value = Nothing}]], ino + 1, nenv)
     0 -> (ifList [
         lcond, (Left [Instruction {line = ic, command = "jumpIfFalse", value = Just (AstInteger (iy + r))}]),
-        lyes,
-        lno
-        ], ino, nenv)
+        lyes, lno], ino, nenv)
     _ -> (Right "if invalid call", i, env)
     where
         (lcond, ic, cenv) = astToInstructions cond i env -- cond 
