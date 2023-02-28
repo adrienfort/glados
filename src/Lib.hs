@@ -18,7 +18,7 @@ data Ast = AstInteger Int
 
 type Env = [(String, Ast)]
 
-type IEnv = [(String, ([String], [Instruction]))]
+type IEnv = [(String, Either ([String], [Instruction]) Ast)]
 -- instance Show Ast where
     -- show (AstInteger n) = show n
     -- show (AstSymbol n) = n

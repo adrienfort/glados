@@ -29,7 +29,7 @@ astToInstructions :: Ast -> Int -> IEnv -> ((Either [Instruction] String), Int, 
 astToInstructions (AstLambda args v) i env = case astToInstructions v i env of
     (Right err, ni, nenv) -> (Right err, ni, nenv)
     (Left li, ni, nenv) -> appendInstruction (Left li) [Instruction {line = ni, command = "call", value = Just (AstSymbol "lambda")},
-        Instruction {line = ni + 1, command = "deleteEnv", value = Just (AstSymbol "lambda")}] (nenv ++ [("lambda", (args, li))]) -- to tail
+        Instruction {line = ni + 1, command = "deleteEnv", value = Just (AstSymbol "lambda")}] (nenv ++ [("lambda", Left (args, li))]) -- to tail
 astToInstructions (AstCall (AstSymbol "if":b)) i env = ifToInstructions i (AstCall (AstSymbol "if":b)) i env
 astToInstructions (AstCall (a:b)) i env = case callToInstructions (AstCall (a:b)) i env of
     (Right err, ni, nenv) -> (Right err, ni, nenv)
@@ -65,19 +65,17 @@ defineInstruction :: Ast -> Int -> IEnv -> ((Either [Instruction] String), Int, 
 -- define lambda = env
 defineInstruction (AstDefine (Left s) (AstLambda args v)) i env = case compileExpression v 0 env of
     (Right err, _, nenv) -> (Right err, i, nenv)
-    (Left a, _, nenv) -> (Left [], i, insertToTupleArray nenv s (args, a))
+    (Left a, _, nenv) -> (Left [], i, insertToTupleArray nenv s (Left (args, a)))
 -- define var = define
-defineInstruction (AstDefine (Left s) v) i env = case astToInstructions v i env of
+defineInstruction (AstDefine (Left s) v) i env = case compileExpression v i env of
     (Right err, ni, nenv) -> (Right err, ni, nenv)
-    (li, ni, nenv) -> appendInstruction li [
-        Instruction {line = ni, command = "define", value = Just (AstSymbol s)},
-        Instruction {line = ni + 1, command = "return", value = Nothing}] nenv
+    (li, ni, nenv) -> (li, ni, nenv) -- call guillaume exec function
 -- invalid define func
 defineInstruction (AstDefine (Right []) _) i env = (Right "define invalid call", i, env)
 -- define func = env
 defineInstruction (AstDefine (Right (s:b)) v) i env = case compileExpression v 0 env of
     (Right err, _, nenv) -> (Right err, i, nenv)
-    (Left a, _, nenv) -> (Left [], i, insertToTupleArray nenv s (b, a))
+    (Left a, _, nenv) -> (Left [], i, insertToTupleArray nenv s (Left (b, a)))
 defineInstruction _ i env = (Right "? invalid call", i, env)
 
 compileExpression :: Ast -> Int -> IEnv -> ((Either [Instruction] String), Int, IEnv)
