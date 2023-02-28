@@ -11,6 +11,7 @@ data Instruction = Instruction {
     value :: Maybe Ast
 }
 
+type Env = (String, Either ([String], [Instruction]) Ast)
 
 type Stack = [Ast]
 
@@ -33,7 +34,7 @@ instructions = [
     Instruction {line = 7, command = "return", value = Nothing}
     ]
 
-stack :: [Stack]
+stack :: Stack
 stack = [
     AstInteger 10,
     AstInteger 2
@@ -46,21 +47,33 @@ jump (x:xs) lineNum
     | otherwise = jump xs lineNum
 
 
-modulo :: Stack
-modulo (a:b:[]) env = case eval a env of
-    (Value a1) -> case eval b env of
-        (Value 0) -> (Err ("Divide by zero in function modulo " ++ show a ++ " " ++ show b))
-        (Value a2) -> (Val (a1`mod`a2))
-        (Error err) -> (Err err)
-        (_) -> (Err ("Invalid arguments to function mod " ++ show a ++ " " ++ show b))
-    (Error err) -> (Err err)
-    (_) -> (Err ("Invalid arguments to function mod " ++ show a ++ " " ++ show b))
-modulo _ _ = (Err "Invalid arguments to function mod")
+
+
+-- add :: Stack -> Env -> Stack
+-- add stack env = stack
+
+-- eval :: [Instruction] -> Env -> Stack -> ([Instruction], Stack)
+-- eval 
+
+push :: Ast -> Stack -> Either Stack String
+push ast stack = case ast of
+    (AstInteger _) -> Left (ast:stack)
+    (AstBoolean _) -> Left (ast:stack)
+    (_) -> Right "Error dans push"
+
+
+exec :: [Instruction] -> Env -> Stack -> Either Ast String
+exec (Instruction {line = l, command = "push", value = Just v}:b) env stack = case push v stack of
+    (Left newstack) -> exec b env newstack
+    (Right error) -> Right error
+    -- Instruction {line = l, command = "push", value = Just v} -> case push v stack of
+        -- (Left newstack) -> exec b env newstack
+        -- (Right error) -> Right stack
 
 
 
 
 toto :: IO ()
 -- toto = print instructions
--- toto = print (jump instructions 3)
-toto = print (modulo stack)
+toto = print (jump instructions 3)
+-- toto = print (modulo stack)
