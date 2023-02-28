@@ -29,7 +29,7 @@ astToInstructions :: Ast -> Int -> IEnv -> ((Either [Instruction] String), Int, 
 astToInstructions (AstLambda args v) i env = case astToInstructions v i env of
     (Right err, ni, nenv) -> (Right err, ni, nenv)
     (Left li, ni, nenv) -> addInstruction (Left li) [Instruction {line = ni, command = "call", value = Just (AstSymbol "lambda")},
-        Instruction {line = ni + 1, command = "deleteEnv", value = Just (AstSymbol "lambda")}] (addToTupleArray nenv "lambda" (args, li))
+        Instruction {line = ni + 1, command = "deleteEnv", value = Just (AstSymbol "lambda")}] (nenv ++ [("lambda", (args, li))]) -- to tail
 astToInstructions (AstCall (AstSymbol "if":b)) i env = ifToInstructions i (AstCall (AstSymbol "if":b)) i env
 astToInstructions (AstCall (a:b)) i env = case callToInstructions (AstCall (a:b)) i env of
     (Right err, ni, nenv) -> (Right err, ni, nenv)

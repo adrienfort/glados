@@ -53,7 +53,7 @@ define astDefine : define a variable, returning nothing
         0 define (AstDefine (Left a) (AstInteger 5))
         1 return
 
-deleteEnv name: delete from the env a given name (delete from the end)
+deleteEnv name: delete from the env a given name
     Example :
         ((lambda (a b) (+ a b)) 1 2)
     =>
