@@ -4,6 +4,7 @@ module Lib (
         Env,
         Instruction (..),
         IEnv,
+        Stack,
         insertToTupleArray,
         addToTupleArray
     ) where
@@ -18,7 +19,9 @@ data Ast = AstInteger Int
 
 type Env = [(String, Ast)]
 
-type IEnv = [(String, ([String], [Instruction]))]
+type IEnv = [(String, Either ([String], [Instruction]) Ast)]
+type Stack = [Ast]
+
 -- instance Show Ast where
     -- show (AstInteger n) = show n
     -- show (AstSymbol n) = n

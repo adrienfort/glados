@@ -34,6 +34,8 @@ instructions = [
     Instruction {line = 7, command = "return", value = Nothing}
     ]
 
+
+
 stack :: Stack
 stack = [
     AstInteger 10,
@@ -55,20 +57,9 @@ jump (x:xs) lineNum
 -- eval :: [Instruction] -> Env -> Stack -> ([Instruction], Stack)
 -- eval 
 
-push :: Ast -> Stack -> Either Stack String
-push ast stack = case ast of
-    (AstInteger _) -> Left (ast:stack)
-    (AstBoolean _) -> Left (ast:stack)
-    (_) -> Right "Error dans push"
+    -- (Left newstack) -> exec b env newstack
+    -- (Right error) -> Right error
 
-
-exec :: [Instruction] -> Env -> Stack -> Either Ast String
-exec (Instruction {line = l, command = "push", value = Just v}:b) env stack = case push v stack of
-    (Left newstack) -> exec b env newstack
-    (Right error) -> Right error
-    -- Instruction {line = l, command = "push", value = Just v} -> case push v stack of
-        -- (Left newstack) -> exec b env newstack
-        -- (Right error) -> Right stack
 
 
 
