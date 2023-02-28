@@ -1,14 +1,24 @@
-module Lib (Cpt (..), Ast (..), Env) where
+module Lib (
+        Cpt (..),
+        Ast (..),
+        Env,
+        Instruction (..),
+        IEnv,
+        insertToTupleArray,
+        addToTupleArray
+    ) where
 
 data Ast = AstInteger Int
     | AstSymbol String
     | AstBoolean String
-    | AstCall [Ast]
     | AstDefine (Either String [String]) Ast
-    | AstLambda [String] Ast deriving (Show)
+    | AstCall [Ast]
+    | AstLambda [String] Ast
+    deriving (Show)
 
 type Env = [(String, Ast)]
 
+type IEnv = [(String, ([String], [Instruction]))]
 -- instance Show Ast where
     -- show (AstInteger n) = show n
     -- show (AstSymbol n) = n
@@ -26,8 +36,9 @@ instance Eq Ast where
     (AstSymbol n1) == (AstSymbol n2) = n1 == n2
     (AstBoolean n1) == (AstBoolean n2) = n1 == n2
     (AstCall s1) == (AstCall s2) = s1 == s2
-    (AstDefine (Left s1) n1) == (AstDefine (Left s2) n2) = s1 == s2 && n1 == n2
-    (AstDefine (Right s1) n1) == (AstDefine (Right s2) n2) = s1 == s2 && n1 == n2
+    (AstDefine s1 n1) == (AstDefine s2 n2) = s1 == s2 && n1 == n2
+    -- (AstDefine (Left s1) n1) == (AstDefine (Left s2) n2) = s1 == s2 && n1 == n2
+    -- (AstDefine (Right s1) n1) == (AstDefine (Right s2) n2) = s1 == s2 && n1 == n2
     (AstLambda s1 n1) == (AstLambda s2 n2) = s1 == s2 && n1 == n2
     _ == _ = False
 
@@ -51,5 +62,17 @@ instance Eq Cpt where
 data Instruction = Instruction {
     line :: Int,
     command :: String,
-    value :: Ast
-}
+    value :: Maybe Ast
+} deriving (Show, Eq)
+
+insertToTupleArray :: [(String, a)] -> String -> a -> [(String, a)]
+insertToTupleArray list str v = case lookup str list of
+    Nothing -> (str, v) : list
+    Just _ -> replaceKey list
+        where
+            replaceKey [] = []
+            replaceKey ((s, val) : b) | s == str = ((str, v) : b)
+                                    | otherwise = ((s, val) : (replaceKey b))
+
+addToTupleArray :: [(String, a)] -> String -> a -> [(String, a)]
+addToTupleArray list str a = (str, a) : list

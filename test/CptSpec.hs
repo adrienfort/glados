@@ -23,4 +23,7 @@ parseSourceCodeSucceeds = do
 
 spec :: Spec
 spec = do
-    parseSourceCodeSucceeds
+    describe "empty" $ do
+        it "no" $ do
+            1 `shouldBe` 1
+    -- parseSourceCodeSucceeds

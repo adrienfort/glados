@@ -28,10 +28,10 @@ cptToAst (CptInteger i) = AstInteger i
 cptToAst (CptSymbols "#t") = AstBoolean "#t"
 cptToAst (CptSymbols "#f") = AstBoolean "#f"
 cptToAst (CptSymbols s) = AstSymbol s
-cptToAst (CptLists [CptSymbols "define", CptSymbols s, value]) = AstDefine (Left s) (cptToAst value)
-cptToAst (CptLists [CptSymbols "define", CptLists keys, value]) = AstDefine (Right (cptListSymbolsToStringArray keys)) (cptToAst value)
-cptToAst (CptLists [CptSymbols "lambda", CptLists args, value]) = AstLambda (cptListSymbolsToStringArray args) (cptToAst value)
-cptToAst (CptLists l) = AstCall (cptListToAst l)
+-- cptToAst (CptLists [CptSymbols "define", CptSymbols s, value]) = AstDefine (Left s) (cptToAst value)
+-- cptToAst (CptLists [CptSymbols "define", CptLists keys, value]) = AstDefine (Right (cptListSymbolsToStringArray keys)) (cptToAst value)
+-- cptToAst (CptLists [CptSymbols "lambda", CptLists args, value]) = AstLambda (cptListSymbolsToStringArray args) (cptToAst value)
+-- cptToAst (CptLists l) = AstCall (cptListToAst l)
 
 cptListSymbolsToStringArray :: [Cpt] -> [String]
 cptListSymbolsToStringArray (CptSymbols a : b) = [a] ++ cptListSymbolsToStringArray b
