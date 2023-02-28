@@ -5,8 +5,8 @@ module Compile
 
 import Lib
 
-addInstruction :: (Either [Instruction] String) -> [Instruction] -> IEnv -> ((Either [Instruction] String), Int, IEnv)
-addInstruction a ni env = case a of
+appendInstruction :: (Either [Instruction] String) -> [Instruction] -> IEnv -> ((Either [Instruction] String), Int, IEnv)
+appendInstruction a ni env = case a of
     (Right err) -> (Right err, line (last ni), env)
     (Left li) -> (Left (li ++ ni), line (last ni) + 1, env)
 
@@ -28,12 +28,12 @@ astToInstructions :: Ast -> Int -> IEnv -> ((Either [Instruction] String), Int, 
 -- Get instructions from expression -> Add lambda instructions to IEnv -> Call Lambda -> deleteEnv lambda
 astToInstructions (AstLambda args v) i env = case astToInstructions v i env of
     (Right err, ni, nenv) -> (Right err, ni, nenv)
-    (Left li, ni, nenv) -> addInstruction (Left li) [Instruction {line = ni, command = "call", value = Just (AstSymbol "lambda")},
+    (Left li, ni, nenv) -> appendInstruction (Left li) [Instruction {line = ni, command = "call", value = Just (AstSymbol "lambda")},
         Instruction {line = ni + 1, command = "deleteEnv", value = Just (AstSymbol "lambda")}] (nenv ++ [("lambda", (args, li))]) -- to tail
 astToInstructions (AstCall (AstSymbol "if":b)) i env = ifToInstructions i (AstCall (AstSymbol "if":b)) i env
 astToInstructions (AstCall (a:b)) i env = case callToInstructions (AstCall (a:b)) i env of
     (Right err, ni, nenv) -> (Right err, ni, nenv)
-    (li, ni, nenv) -> addInstruction li [Instruction {line = ni, command = "call", value = Just a}] nenv
+    (li, ni, nenv) -> appendInstruction li [Instruction {line = ni, command = "call", value = Just a}] nenv
 astToInstructions (AstSymbol a) i env = (Left [Instruction {line = i, command = "get", value = Just (AstSymbol a)}], i + 1, env)
 astToInstructions (AstDefine _ _) i env = (Right "define invalid call", i, env)
 astToInstructions a i env = (Left [Instruction {line = i, command = "push", value = Just a}], i + 1, env)
@@ -74,7 +74,7 @@ defineInstruction (AstDefine (Left s) (AstLambda args v)) i env = case compileEx
 -- define var = define
 defineInstruction (AstDefine (Left s) v) i env = case astToInstructions v i env of
     (Right err, ni, nenv) -> (Right err, ni, nenv)
-    (li, ni, nenv) -> addInstruction li [
+    (li, ni, nenv) -> appendInstruction li [
         Instruction {line = ni, command = "define", value = Just (AstSymbol s)},
         Instruction {line = ni + 1, command = "return", value = Nothing}] nenv
 -- invalid define func
