@@ -3,7 +3,6 @@ module Lib (
         Ast (..),
         Env,
         Instruction (..),
-        IEnv,
         Stack,
         insertToTupleArray,
         addToTupleArray
@@ -17,9 +16,7 @@ data Ast = AstInteger Int
     | AstLambda [String] Ast
     deriving (Show)
 
-type Env = [(String, Ast)]
-
-type IEnv = [(String, Either ([String], [Instruction]) Ast)]
+type Env = [(String, Either ([String], [Instruction]) Ast)]
 type Stack = [Ast]
 
 -- instance Show Ast where

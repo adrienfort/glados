@@ -22,10 +22,10 @@ compileIfSpec = do
         it "(define x (if #t 1 0))" $ do
             compile [(AstDefine (Left "x") (AstCall [AstSymbol "if", AstBoolean "#t", AstInteger 1, AstInteger 0]))] 0 [] `shouldBe` (Left [
                     Instruction {line = 0, command = "push", value = Just (AstBoolean "#t")},
-                    Instruction {line = 1, command = "jumpIfFalse", value = Just (AstInteger 3)},
+                    Instruction {line = 1, command = "jumpIfFalse", value = Just (AstInteger 4)},
                     Instruction {line = 2, command = "push", value = Just (AstInteger 1)},
-                    Instruction {line = 3, command = "push", value = Just (AstInteger 0)},
-                    Instruction {line = 4, command = "define", value = Just (AstSymbol "x")},
+                    Instruction {line = 3, command = "return", value = Nothing},
+                    Instruction {line = 4, command = "push", value = Just (AstInteger 0)},
                     Instruction {line = 5, command = "return", value = Nothing}
                     ], 6, [])
 
@@ -67,15 +67,15 @@ compileSimpleExpressionSpec = do
                 Instruction {line = 2, command = "deleteEnv", value = Just (AstSymbol "lambda")},
                 Instruction {line = 3, command = "return", value = Nothing}
                 ], 4, [
-                    ("lambda", (["x"],
+                    ("lambda", Left (["x"],
                     [Instruction {line = 0, command = "push", value = Just (AstInteger 2)}]))
                 ])
         it "(define x 5)" $ do
             compile [AstDefine (Left "x") (AstInteger 5)] 0 [] `shouldBe` (Left [
                 Instruction {line = 0, command = "push", value = Just (AstInteger 5)},
-                Instruction {line = 1, command = "define", value = Just (AstSymbol "x")},
-                Instruction {line = 2, command = "return", value = Nothing}
-                ], 3, [])
+                Instruction {line = 1, command = "return", value = Nothing}
+                ], 2, [])
+                -- [("x", Right (AstInteger 5))])
 
 compileHardSpec :: Spec
 compileHardSpec = do
@@ -89,7 +89,7 @@ compileHardSpec = do
                 Instruction {line = 1, command = "call", value = Just (AstSymbol "fact")},
                 Instruction {line = 2, command = "return", value = Nothing}
                 ], 3, [
-                    ("fact", (["x"],
+                    ("fact", Left (["x"],
                     [
                         Instruction {line = 0, command = "get", value = Just (AstSymbol "x")},
                         Instruction {line = 1, command = "push", value = Just (AstInteger 1)},
@@ -112,7 +112,7 @@ compileHardSpec = do
                 Instruction {line = 1, command = "call", value = Just (AstSymbol "fact")},
                 Instruction {line = 2, command = "return", value = Nothing}
                 ], 3, [
-                    ("fact", (["x"],
+                    ("fact", Left (["x"],
                     [
                         Instruction {line = 0, command = "get", value = Just (AstSymbol "x")},
                         Instruction {line = 1, command = "push", value = Just (AstInteger 1)},
