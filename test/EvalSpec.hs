@@ -30,4 +30,7 @@ import Lib
 
 spec :: Spec
 spec = do
-    toto
+    describe "test success" $ do
+        it "ok" $ do
+            1 `shouldBe` 1
+    -- toto

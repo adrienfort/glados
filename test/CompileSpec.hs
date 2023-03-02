@@ -130,8 +130,21 @@ compileHardSpec = do
                     ])
                 )])
 
+compileTrickySpec :: Spec
+compileTrickySpec = do
+    describe "tricky test" $ do
+        it "1 (+ 2)" $ do
+            compile [AstInteger 1, AstCall [AstSymbol "+", AstInteger 2]] 0 [] `shouldBe` (Left [
+                Instruction {line = 0, command = "push", value = Just (AstInteger 1)},
+                Instruction {line = 1, command = "return", value = Nothing},
+                Instruction {line = 2, command = "push", value = Just (AstInteger 2)},
+                Instruction {line = 3, command = "call", value = Just (AstSymbol "+")},
+                Instruction {line = 4, command = "return", value = Nothing}
+                ], 5, [])
+
 spec :: Spec
 spec = do
     compileIfSpec
     compileSimpleExpressionSpec
     compileHardSpec
+    compileTrickySpec
