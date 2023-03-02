@@ -1,6 +1,7 @@
 module Eval
     (
         exec,
+        ifcondition,
         add
     ) where
 
@@ -76,10 +77,20 @@ push ast stack = case ast of
 -- ("<", inferiorto),
 -- ("eq?", equal)
 
-add :: Stack -> Either Stack String
-add (AstInteger a : AstInteger b : rest) = Left (AstInteger (a + b) : rest)
-add _ = Right "Error dans la stack de add"
+ifcondition :: Function
+-- ifcondition add (AstInteger a : AstInteger b : rest) = Left (AstInteger (a + b) : rest)
+ifcondition (AstInteger a : AstInteger b : rest) = case a == b of
+    (True) -> Left (AstBoolean "#t" : rest)
+    (False) -> Left (AstBoolean "#f" : rest)
+ifcondition (AstBoolean a : AstBoolean b : rest) = case a == b of
+    (True) -> Left (AstBoolean "#t" : rest)
+    (False) -> Left (AstBoolean "#f" : rest)
+ifcondition _ = Right "Error in the stack of ifcondition"
 
+
+add :: Function
+add (AstInteger a : AstInteger b : rest) = Left (AstInteger (a + b) : rest)
+add _ = Right "Error in the stack of add"
 
 
 

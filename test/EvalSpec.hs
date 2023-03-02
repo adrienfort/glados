@@ -31,6 +31,18 @@ pushSpec = do
                     ("sucess", Right (AstInteger 2))
                 ] [] `shouldBe` (Left (AstInteger 1))
 
+    describe "ifcondition with Stack" $ do
+        it "= 1 1" $ do
+            ifcondition [AstInteger 1, AstInteger 1] `shouldBe` (Left [AstBoolean "#t"])
+        it "= 1 2" $ do
+            ifcondition [AstInteger 2, AstInteger 1] `shouldBe` (Left [AstBoolean "#f"])
+        it "= #t #t" $ do
+            ifcondition [AstBoolean "#t", AstBoolean "#t"] `shouldBe` (Left [AstBoolean "#t"])
+        it "= #t #f" $ do
+            ifcondition [AstBoolean "#f", AstBoolean "#t"] `shouldBe` (Left [AstBoolean "#f"])
+        it "= 1 #f" $ do
+            ifcondition [AstBoolean "#f", AstInteger 1] `shouldBe` (Right "Error in the stack of ifcondition")
+
     describe "add with Stack" $ do
         it "+ 1 2" $ do
             add [AstInteger 2, AstInteger 1] `shouldBe` (Left [AstInteger 3])
@@ -40,6 +52,8 @@ pushSpec = do
             add [AstInteger 2, AstInteger (-1)] `shouldBe` (Left [AstInteger 1])
         it "+ -1 -2" $ do
             add [AstInteger (-2), AstInteger (-1)] `shouldBe` (Left [AstInteger (-3)])
+        it "+ 1" $ do
+            add [AstInteger (1)] `shouldBe` (Right "Error in the stack of add")
     
 
 spec :: Spec
