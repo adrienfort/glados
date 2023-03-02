@@ -106,6 +106,16 @@ pushSpec = do
             modulo [AstInteger 0, AstInteger 2] `shouldBe` (Right "Divide by zero in function modulo")
         it "% 1" $ do
             modulo [AstInteger (1)] `shouldBe` (Right "Error in the size of stack in modulo")
+
+    describe "inferiorto with Stack" $ do
+        it "< 6 4" $ do
+            inferiorto [AstInteger 4, AstInteger 6] `shouldBe` (Left [AstBoolean "#f"])
+        it "< 0 2" $ do
+            inferiorto [AstInteger 2, AstInteger 0] `shouldBe` (Left [AstBoolean "#t"])
+        it "< 0 0" $ do
+            inferiorto [AstInteger 0, AstInteger 0] `shouldBe` (Left [AstBoolean "#f"])
+        it "< 1" $ do
+            inferiorto [AstInteger (1)] `shouldBe` (Right "Error in the size of stack in inferiorto")
     
 
 spec :: Spec

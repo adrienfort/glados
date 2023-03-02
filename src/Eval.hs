@@ -6,7 +6,8 @@ module Eval
         minus,
         mult,
         division,
-        modulo
+        modulo,
+        inferiorto
     ) where
 
 import Lib
@@ -118,6 +119,14 @@ modulo (AstInteger a : AstInteger b : rest)
     | a == 0 = Right "Divide by zero in function modulo"
     | otherwise = Left (AstInteger (b `mod` a) : rest)
 modulo _ = Right "Error in the size of stack in modulo"
+
+
+inferiorto :: Function
+inferiorto (AstInteger a : AstInteger b : rest)
+    | b < a = Left (AstBoolean "#t" : rest)
+    | otherwise = Left (AstBoolean "#f" : rest)
+inferiorto _ = Right "Error in the size of stack in inferiorto"
+
 
 
 
