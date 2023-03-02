@@ -5,7 +5,8 @@ module Eval
         add,
         minus,
         mult,
-        division
+        division,
+        modulo
     ) where
 
 import Lib
@@ -94,6 +95,7 @@ add :: Function
 add (AstInteger a : AstInteger b : rest) = Left (AstInteger (b + a) : rest)
 add _ = Right "Error in the size of stack in add"
 
+
 minus :: Function
 minus (AstInteger a : AstInteger b : rest) = Left (AstInteger (b - a) : rest)
 minus _ = Right "Error in the size of stack in minus"
@@ -104,21 +106,19 @@ mult (AstInteger a : AstInteger b : rest) = Left (AstInteger (b * a) : rest)
 mult _ = Right "Error in the size of stack in mult"
 
 
--- division :: Function
--- division (AstInteger a : AstInteger b : rest) =  case AstInteger a of
---     (a == 0) -> Right "Divide by zero in function division"
---     _ -> Left (AstInteger (b`div`a) : rest)
--- division _ = Right "Error in the size of stack in division"
-
 division :: Function
 division (AstInteger a : AstInteger b : rest)
     | a == 0 = Right "Divide by zero in function division"
     | otherwise = Left (AstInteger (b `div` a) : rest)
 division _ = Right "Error in the size of stack in division"
 
--- division :: Function
--- division (AstInteger a : AstInteger b : rest) = Left (AstInteger (b `div` a) : rest)
--- division _ = Right "Error in the size of stack in division"
+
+modulo :: Function
+modulo (AstInteger a : AstInteger b : rest)
+    | a == 0 = Right "Divide by zero in function modulo"
+    | otherwise = Left (AstInteger (b `mod` a) : rest)
+modulo _ = Right "Error in the size of stack in modulo"
+
 
 
 -------------------------------- BUILTINS --------------------------------

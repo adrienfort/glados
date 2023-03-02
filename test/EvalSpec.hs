@@ -96,6 +96,16 @@ pushSpec = do
             division [AstInteger 0, AstInteger 2] `shouldBe` (Right "Divide by zero in function division")
         it "/ 1" $ do
             division [AstInteger (1)] `shouldBe` (Right "Error in the size of stack in division")
+
+    describe "modulo with Stack" $ do
+        it "% 6 4" $ do
+            modulo [AstInteger 4, AstInteger 6] `shouldBe` (Left [AstInteger 2])
+        it "% 0 2" $ do
+            modulo [AstInteger 2, AstInteger 0] `shouldBe` (Left [AstInteger 0])
+        it "% 2 0" $ do
+            modulo [AstInteger 0, AstInteger 2] `shouldBe` (Right "Divide by zero in function modulo")
+        it "% 1" $ do
+            modulo [AstInteger (1)] `shouldBe` (Right "Error in the size of stack in modulo")
     
 
 spec :: Spec
