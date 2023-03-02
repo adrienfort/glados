@@ -16,18 +16,32 @@ import Lib
     -- Instruction {line = 7, command = "return", value = Nothing}
     -- ]
 
--- TestPush :: Spec
--- TestPush = do
-    -- describe "test success" $ do
-        -- it "(x 1 2)" $ do
-            -- compile [AstCall [AstSymbol "x", AstInteger 1, AstInteger 2]] 0 [] `shouldBe` (Left [
-            --     Instruction {line = 0, command = "push", value = Just (AstInteger 1)},
-            --     Instruction {line = 1, command = "push", value = Just (AstInteger 2)},
-            --     Instruction {line = 2, command = "call", value = Just (AstSymbol "x")},
-            --     Instruction {line = 3, command = "return", value = Nothing}
-            --     ], 4, [])
-            -- exec (AstInteger 10) -> 
+-- exec :: [Instruction] -> Env -> Stack -> Either Ast String
+-- type Env = [(String, Either ([String], [Instruction]) Ast)]
+
+pushSpec :: Spec
+pushSpec = do
+    describe "test success" $ do
+        it "(1)" $ do
+            exec [
+                Instruction {line = 0, command = "push", value = Just (AstInteger 1)},
+                Instruction {line = 1, command = "return", value = Nothing}
+                ] [
+                    ("sucess", Left (["x"], [])),
+                    ("sucess", Right (AstInteger 2))
+                ] [] `shouldBe` (Left (AstInteger 1))
+
+    describe "add with Stack" $ do
+        it "+ 1 2" $ do
+            add [AstInteger 2, AstInteger 1] `shouldBe` (Left [AstInteger 3])
+        it "+ 1 -2" $ do
+            add [AstInteger (-2), AstInteger 1] `shouldBe` (Left [AstInteger (-1)])
+        it "+ -1 2" $ do
+            add [AstInteger 2, AstInteger (-1)] `shouldBe` (Left [AstInteger 1])
+        it "+ -1 -2" $ do
+            add [AstInteger (-2), AstInteger (-1)] `shouldBe` (Left [AstInteger (-3)])
+    
 
 spec :: Spec
 spec = do
-    toto
+    pushSpec

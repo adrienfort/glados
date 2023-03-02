@@ -1,6 +1,7 @@
 module Eval
     (
-        exec
+        exec,
+        add
     ) where
 
 import Lib
@@ -27,9 +28,19 @@ stackPop (_:b) = b
             -- replaceKey ((s, val) : b) | s == str = ((str, ast) : b)
                                     -- | otherwise = ((s, val) : (replaceKey b))
 
--- add a new key value
--- envAddKey :: String -> Ast -> Env -> Env
--- envAddKey str ast env = (str, ast) : env
+
+-- instructions :: [Instruction]
+-- instructions = [
+    -- Instruction {line = 0, command = "push", value = Just (AstInteger 0)},
+    -- Instruction {line = 1, command = "get", value = Just (AstSymbol "x")},
+    -- Instruction {line = 2, command = "call", value = Just (AstSymbol "eq?")},
+    -- Instruction {line = 3, command = "jumpIfFalse", value = Just (AstInteger 7)},
+    -- Instruction {line = 4, command = "push", value = Just (AstInteger 1)},
+    -- Instruction {line = 5, command = "return", value = Nothing},
+    -- Instruction {line = 6, command = "get", value = Just (AstSymbol "foo")},
+    -- Instruction {line = 7, command = "return", value = Nothing}
+    -- ]
+
 
 stack :: Stack
 stack = [
@@ -43,6 +54,9 @@ jump (x:xs) lineNum
     | line x == lineNum = x:xs
     | otherwise = jump xs lineNum
 
+-- add a new key value
+-- envAddKey :: String -> Ast -> Env -> Env
+-- envAddKey str ast env = (str, ast) : env
 
 push :: Ast -> Stack -> Either Stack String
 push ast stack = case ast of
@@ -50,14 +64,41 @@ push ast stack = case ast of
     (AstBoolean _) -> Left (ast:stack)
     (_) -> Right "Error dans push"
 
-call :: (Int, String) -> Stack -> Env -> Either Stack String
-call (l, s) stack env = Right "err"
+
+
+-------------------------------- BUILTINS --------------------------------
+-- ("if", ifcondition),
+-- ("+", add),
+-- ("-", minus),
+-- ("*", mult),
+-- ("div", division),
+-- ("mod", modulo),
+-- ("<", inferiorto),
+-- ("eq?", equal)
+
+add :: Stack -> Either Stack String
+add (AstInteger a : AstInteger b : rest) = Left (AstInteger (a + b) : rest)
+add _ = Right "Error dans la stack de add"
+
+
+
+
+-------------------------------- BUILTINS --------------------------------
+
+
+-- type Env = [(String, Either ([String], [Instruction]) Ast)]
+
+-- getEnvValue :: String -> Env -> Stack -> Either 
+
 
 exec :: [Instruction] -> Env -> Stack -> Either Ast String
 exec (Instruction {line = l, command = "push", value = Just v}:b) env stack = case push v stack of
     (Left newstack) -> exec b env newstack
     (Right error) -> Right error
-exec (Instruction {line = l, command = "call", value = Just (AstSymbol s)}:b) env stack = case call (l, s) stack env of
-    (Right err) -> Right err
-    (Left newstack) -> exec b env newstack
+exec (Instruction {line = l, command = "return", value = Nothing}:_) env (a:b) = Left a
+
 -- exec (Instruction {line = l, command = "get", value = Just v}:b) env stack = case push v stack of
+
+
+toto :: IO()
+toto = print (add stack)
