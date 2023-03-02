@@ -3,7 +3,9 @@ module Eval
         exec,
         ifcondition,
         add,
-        minus
+        minus,
+        mult,
+        division
     ) where
 
 import Lib
@@ -79,25 +81,44 @@ push ast stack = case ast of
 -- ("eq?", equal)
 
 ifcondition :: Function
--- ifcondition add (AstInteger a : AstInteger b : rest) = Left (AstInteger (a + b) : rest)
 ifcondition (AstInteger a : AstInteger b : rest) = case a == b of
     (True) -> Left (AstBoolean "#t" : rest)
     (False) -> Left (AstBoolean "#f" : rest)
 ifcondition (AstBoolean a : AstBoolean b : rest) = case a == b of
     (True) -> Left (AstBoolean "#t" : rest)
     (False) -> Left (AstBoolean "#f" : rest)
-ifcondition _ = Right "Error in the stack of ifcondition"
+ifcondition _ = Right "Error in the size of stack in ifcondition"
 
 
 add :: Function
 add (AstInteger a : AstInteger b : rest) = Left (AstInteger (b + a) : rest)
-add _ = Right "Error in the stack of add"
+add _ = Right "Error in the size of stack in add"
 
 minus :: Function
 minus (AstInteger a : AstInteger b : rest) = Left (AstInteger (b - a) : rest)
-minus _ = Right "Error in the stack of minus"
+minus _ = Right "Error in the size of stack in minus"
 
 
+mult :: Function
+mult (AstInteger a : AstInteger b : rest) = Left (AstInteger (b * a) : rest)
+mult _ = Right "Error in the size of stack in mult"
+
+
+-- division :: Function
+-- division (AstInteger a : AstInteger b : rest) =  case AstInteger a of
+--     (a == 0) -> Right "Divide by zero in function division"
+--     _ -> Left (AstInteger (b`div`a) : rest)
+-- division _ = Right "Error in the size of stack in division"
+
+division :: Function
+division (AstInteger a : AstInteger b : rest)
+    | a == 0 = Right "Divide by zero in function division"
+    | otherwise = Left (AstInteger (b `div` a) : rest)
+division _ = Right "Error in the size of stack in division"
+
+-- division :: Function
+-- division (AstInteger a : AstInteger b : rest) = Left (AstInteger (b `div` a) : rest)
+-- division _ = Right "Error in the size of stack in division"
 
 
 -------------------------------- BUILTINS --------------------------------

@@ -41,7 +41,7 @@ pushSpec = do
         it "= #t #f" $ do
             ifcondition [AstBoolean "#f", AstBoolean "#t"] `shouldBe` (Left [AstBoolean "#f"])
         it "= 1 #f" $ do
-            ifcondition [AstBoolean "#f", AstInteger 1] `shouldBe` (Right "Error in the stack of ifcondition")
+            ifcondition [AstBoolean "#f", AstInteger 1] `shouldBe` (Right "Error in the size of stack in ifcondition")
 
     describe "add with Stack" $ do
         it "+ 1 2" $ do
@@ -53,7 +53,7 @@ pushSpec = do
         it "+ -1 -2" $ do
             add [AstInteger (-2), AstInteger (-1)] `shouldBe` (Left [AstInteger (-3)])
         it "+ 1" $ do
-            add [AstInteger (1)] `shouldBe` (Right "Error in the stack of add")
+            add [AstInteger (1)] `shouldBe` (Right "Error in the size of stack in add")
 
     describe "minus with Stack" $ do
         it "- 1 2" $ do
@@ -65,7 +65,37 @@ pushSpec = do
         it "- -1 -2" $ do
             minus [AstInteger (-2), AstInteger (-1)] `shouldBe` (Left [AstInteger 1])
         it "- 1" $ do
-            minus [AstInteger (1)] `shouldBe` (Right "Error in the stack of minus")
+            minus [AstInteger (1)] `shouldBe` (Right "Error in the size of stack in minus")
+
+    describe "mult with Stack" $ do
+        it "* 1 2" $ do
+            mult [AstInteger 2, AstInteger 1] `shouldBe` (Left [AstInteger 2])
+        it "* 1 -2" $ do
+            mult [AstInteger (-2), AstInteger 1] `shouldBe` (Left [AstInteger (-2)])
+        it "* -1 2" $ do
+            mult [AstInteger 2, AstInteger (-1)] `shouldBe` (Left [AstInteger (-2)])
+        it "* -1 -2" $ do
+            mult [AstInteger (-2), AstInteger (-1)] `shouldBe` (Left [AstInteger 2])
+        it "* 1" $ do
+            mult [AstInteger (1)] `shouldBe` (Right "Error in the size of stack in mult")
+
+    describe "division with Stack" $ do
+        it "/ 3 1" $ do
+            division [AstInteger 1, AstInteger 3] `shouldBe` (Left [AstInteger 3])
+        it "/ 1 2" $ do -- I-m not sure but rounded down
+            division [AstInteger 2, AstInteger 1] `shouldBe` (Left [AstInteger 0])
+        it "/ 3 2" $ do -- I-m not sure but rounded down
+            division [AstInteger 2, AstInteger 3] `shouldBe` (Left [AstInteger 1])
+        it "/ 2 3" $ do -- I-m not sure but rounded down
+            division [AstInteger 3, AstInteger 2] `shouldBe` (Left [AstInteger 0])
+        it "/ 8 10" $ do -- I-m not sure but rounded down
+            division [AstInteger 10, AstInteger 8] `shouldBe` (Left [AstInteger 0])
+        it "/ 0 2" $ do
+            division [AstInteger 2, AstInteger 0] `shouldBe` (Left [AstInteger 0])
+        it "/ 2 0" $ do
+            division [AstInteger 0, AstInteger 2] `shouldBe` (Right "Divide by zero in function division")
+        it "/ 1" $ do
+            division [AstInteger (1)] `shouldBe` (Right "Error in the size of stack in division")
     
 
 spec :: Spec
