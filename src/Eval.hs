@@ -2,7 +2,8 @@ module Eval
     (
         exec,
         ifcondition,
-        add
+        add,
+        minus
     ) where
 
 import Lib
@@ -89,8 +90,13 @@ ifcondition _ = Right "Error in the stack of ifcondition"
 
 
 add :: Function
-add (AstInteger a : AstInteger b : rest) = Left (AstInteger (a + b) : rest)
+add (AstInteger a : AstInteger b : rest) = Left (AstInteger (b + a) : rest)
 add _ = Right "Error in the stack of add"
+
+minus :: Function
+minus (AstInteger a : AstInteger b : rest) = Left (AstInteger (b - a) : rest)
+minus _ = Right "Error in the stack of minus"
+
 
 
 

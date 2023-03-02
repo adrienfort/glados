@@ -54,6 +54,18 @@ pushSpec = do
             add [AstInteger (-2), AstInteger (-1)] `shouldBe` (Left [AstInteger (-3)])
         it "+ 1" $ do
             add [AstInteger (1)] `shouldBe` (Right "Error in the stack of add")
+
+    describe "minus with Stack" $ do
+        it "- 1 2" $ do
+            minus [AstInteger 2, AstInteger 1] `shouldBe` (Left [AstInteger (-1)])
+        it "- 1 -2" $ do
+            minus [AstInteger (-2), AstInteger 1] `shouldBe` (Left [AstInteger 3])
+        it "- -1 2" $ do
+            minus [AstInteger 2, AstInteger (-1)] `shouldBe` (Left [AstInteger (-3)])
+        it "- -1 -2" $ do
+            minus [AstInteger (-2), AstInteger (-1)] `shouldBe` (Left [AstInteger 1])
+        it "- 1" $ do
+            minus [AstInteger (1)] `shouldBe` (Right "Error in the stack of minus")
     
 
 spec :: Spec
