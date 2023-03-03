@@ -4,23 +4,10 @@ import Test.Hspec
 import Eval
 import Lib
 
-pushSpec :: Spec
-pushSpec = do
-    describe "test exec" $ do
-        it "push success" $ do
-            exec [
-                Instruction {line = 0, command = "push", value = Just (AstInteger 1)},
-                Instruction {line = 1, command = "return", value = Nothing}
-                ] [
-                    ("sucess", Left (["x"], [])),
-                    ("sucess", Right (AstInteger 2))
-                ] [] `shouldBe` (Left (AstInteger 1))
-        it "push error" $ do
-            exec [Instruction {line = 0, command = "push", value = Just (AstSymbol "x")}] [] [] `shouldBe` (Right "Error in push")
-        it "get error" $ do
-            exec [Instruction {line = 0, command = "get", value = Just (AstSymbol "x")}] [] [] `shouldBe` (Right "x unknown variable")
-    
 
+
+jumpSpec :: Spec
+jumpSpec = do
     describe "jump" $ do
         it "returns an empty list when given an empty list" $ do
             jump [] 1 `shouldBe` []
@@ -200,7 +187,7 @@ compileSpec = do
 builtinsSpec :: Spec
 builtinsSpec = do
 
-    describe "add with Stack" $ do
+    describe "add function" $ do
         it "+ 1 2" $ do
             add [AstInteger 2, AstInteger 1] `shouldBe` (Left [AstInteger 3])
         it "+ 1 -2" $ do
@@ -212,7 +199,7 @@ builtinsSpec = do
         it "+ 1" $ do
             add [AstInteger (1)] `shouldBe` (Right "+ invalid function call")
 
-    describe "minus with Stack" $ do
+    describe "minus function" $ do
         it "- 1 2" $ do
             minus [AstInteger 2, AstInteger 1] `shouldBe` (Left [AstInteger (-1)])
         it "- 1 -2" $ do
@@ -224,7 +211,7 @@ builtinsSpec = do
         it "- 1" $ do
             minus [AstInteger (1)] `shouldBe` (Right "- invalid function call")
 
-    describe "mult with Stack" $ do
+    describe "mult function" $ do
         it "* 1 2" $ do
             mult [AstInteger 2, AstInteger 1] `shouldBe` (Left [AstInteger 2])
         it "* 1 -2" $ do
@@ -236,7 +223,7 @@ builtinsSpec = do
         it "* 1" $ do
             mult [AstInteger (1)] `shouldBe` (Right "* invalid function call")
 
-    describe "division with Stack" $ do
+    describe "division function" $ do
         it "/ 3 1" $ do
             division [AstInteger 1, AstInteger 3] `shouldBe` (Left [AstInteger 3])
         it "/ 1 2" $ do -- I-m not sure but rounded down
@@ -254,7 +241,7 @@ builtinsSpec = do
         it "/ 1" $ do
             division [AstInteger (1)] `shouldBe` (Right "div invalid function call")
 
-    describe "modulo with Stack" $ do
+    describe "modulo function" $ do
         it "% 6 4" $ do
             modulo [AstInteger 4, AstInteger 6] `shouldBe` (Left [AstInteger 2])
         it "% 0 2" $ do
@@ -264,7 +251,7 @@ builtinsSpec = do
         it "% 1" $ do
             modulo [AstInteger (1)] `shouldBe` (Right "mod invalid function call")
 
-    describe "inferiorto with Stack" $ do
+    describe "inferiorto function" $ do
         it "< 6 4" $ do
             inferiorto [AstInteger 4, AstInteger 6] `shouldBe` (Left [AstBoolean "#f"])
         it "< 0 2" $ do
@@ -274,18 +261,35 @@ builtinsSpec = do
         it "< 1" $ do
             inferiorto [AstInteger (1)] `shouldBe` (Right "< invalid function call")
 
-    -- describe "equal with Stack" $ do
-    --     it "= 4 6" $ do
-    --         equal 
+    describe "equal function" $ do
+        it "should return #t for 1 1" $ do
+            equal [AstInteger 1, AstInteger 1] `shouldBe` Left [AstBoolean "#t"]
+        it "should return #f for 1 2" $ do
+            equal [AstInteger 1, AstInteger 2] `shouldBe` Left [AstBoolean "#f"]
+        it "should return an error message for an invalid function call" $ do
+            equal [AstInteger 1] `shouldBe` Right "eq? invalid function call"
 
-    -- describe "setArgToEnv" $ do
-    --     it "% 6 4" $ do
-    --         setArgToEnv [] [AstInteger 1] [("sucess", Left (["x"], []))]
 
-    
+execSpec :: Spec
+execSpec = do
+    describe "test exec" $ do
+        it "push success" $ do
+            exec [
+                Instruction {line = 0, command = "push", value = Just (AstInteger 1)},
+                Instruction {line = 1, command = "return", value = Nothing}
+                ] [
+                    ("sucess", Left (["x"], [])),
+                    ("sucess", Right (AstInteger 2))
+                ] [] `shouldBe` (Left (AstInteger 1))
+        it "push error" $ do
+            exec [Instruction {line = 0, command = "push", value = Just (AstSymbol "x")}] [] [] `shouldBe` (Right "Error in push")
+        it "get error" $ do
+            exec [Instruction {line = 0, command = "get", value = Just (AstSymbol "x")}] [] [] `shouldBe` (Right "x unknown variable")
+
 
 spec :: Spec
 spec = do
-    pushSpec
+    execSpec
+    jumpSpec
     compileSpec
     builtinsSpec
