@@ -41,6 +41,13 @@ pushSpec = do
                     Instruction {line = 3, command = "jump", value = Just (AstInteger 1)},
                     Instruction {line = 4, command = "push", value = Just (AstInteger 3)}
                 ]
+        it "returns the empty list if given an empty list" $
+            jump [] 1 `shouldBe` []
+        it "returns the original list if the lineNum is not found" $
+            jump [Instruction 1 "add" Nothing, Instruction 2 "mult" Nothing] 3 `shouldBe` []
+        it "returns the list from the matched lineNum instruction onwards" $
+            jump [Instruction 1 "add" Nothing, Instruction 2 "mult" Nothing, Instruction 3 "sub" Nothing] 2 `shouldBe` [Instruction 2 "mult" Nothing, Instruction 3 "sub" Nothing]
+
 
 
 

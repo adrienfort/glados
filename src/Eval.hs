@@ -9,7 +9,8 @@ module Eval
         inferiorto,
         equal,
         setArgToEnv,
-        jump
+        jump,
+        getBuiltins
     ) where
 
 import Lib
