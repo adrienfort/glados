@@ -51,8 +51,6 @@ push ast stack = case ast of
 
 -------------------------------- BUILTINS --------------------------------
 
-
-
 add :: Function
 add (AstInteger a : AstInteger b : rest) = Left (AstInteger (b + a) : rest)
 add _ = Right "+ invalid function call"
@@ -162,6 +160,3 @@ exec (Instruction {line = l, command = "jumpIfFalse", value = Just (AstInteger s
 exec (Instruction {line = _, command = "return", value = Nothing}:_) _ (val:stack) = Left val
 exec (Instruction {line = l, command = cmd, value = _}:_) _ (val:stack) = Right (cmd ++ " unknown call")
 exec [] _ _ = Right ("unexpected end")
-
-
--- exec (Instruction {line = l, command = "get", value = Just v}:b) env stack = case push v stack of
