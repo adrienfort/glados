@@ -7,7 +7,8 @@ module Eval
         division,
         modulo,
         inferiorto,
-        equal
+        equal,
+        setArgToEnv
     ) where
 
 import Lib
@@ -46,7 +47,7 @@ push :: Ast -> Stack -> Either Stack String
 push ast stack = case ast of
     (AstInteger _) -> Left (ast:stack)
     (AstBoolean _) -> Left (ast:stack)
-    (_) -> Right "Error dans push"
+    (_) -> Right "Error in push"
 
 -------------------------------- BUILTINS --------------------------------
 
