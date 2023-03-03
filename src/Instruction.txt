@@ -46,13 +46,6 @@ jumpIfFalse lineToJump : jump to given line if first element of the pile is Fals
         7 return
     => call (eq?) returning a bool for the jumpIfFalse to check
 
-define astDefine : define a variable, returning nothing
-    Example :
-        (define a 5)
-    =>
-        0 define (AstDefine (Left a) (AstInteger 5))
-        1 return
-
 deleteEnv name: delete from the env a given name
     Example :
         ((lambda (a b) (+ a b)) 1 2)

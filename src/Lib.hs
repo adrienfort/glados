@@ -7,7 +7,8 @@ module Lib (
         Function,
         insertToTupleArray,
         addToTupleArray,
-        searchTupleArray
+        searchTupleArray,
+        removeFromTupleArray
     ) where
 
 data Ast = AstInteger Int
@@ -83,3 +84,9 @@ addToTupleArray list str a = (str, a) : list
 
 searchTupleArray :: [(String, a)] -> String -> Maybe a
 searchTupleArray list str = lookup str list
+
+removeFromTupleArray :: [(String, a)] -> String -> [(String, a)]
+removeFromTupleArray [] _ = []
+removeFromTupleArray ((name, val):b) s = case s == name of
+    True -> b
+    False -> (name, val) : removeFromTupleArray b s

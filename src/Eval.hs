@@ -37,12 +37,6 @@ stackPop :: Stack -> Stack
 stackPop [] = []
 stackPop (_:b) = b
 
-stack :: Stack
-stack = [
-    AstInteger 10,
-    AstInteger 2
-    ]
-
 jump :: [Instruction] -> Int -> [Instruction]
 jump [] _ = []
 jump (x:xs) lineNum
@@ -145,18 +139,37 @@ jumpIfFalse instructions lineJump (AstBoolean "#f") = case lineJump < 0 of
     False -> removeNFromList instructions lineJump
 jumpIfFalse instructions lineJump (AstBoolean "#t") = Left instructions
 
+-- type Env = [(String, Either ([String], [Instruction]) Ast)]
+
+-- push symbol value from env
+get :: Ast -> Env -> Stack -> Either Stack String
+get (AstSymbol s) env stack = case searchTupleArray env s of
+    Nothing -> Right (s ++ " unknown variable")
+    Just (Right var) -> Left (var:stack)
+    Just (Left _) -> Right (s ++ " invalid value")
+
+-- delete symbol from env
+deleteEnv :: Ast -> Env -> Env
+deleteEnv (AstSymbol s) env = removeFromTupleArray env s
+
+-- deleteEnv 
 exec :: [Instruction] -> Env -> Stack -> Either Ast String
 exec (Instruction {line = _, command = "push", value = Just v}:b) env stack = case push v stack of
     (Left newstack) -> exec b env newstack
     (Right err) -> Right err
+exec (Instruction {line = _, command = "get", value = Just v}:b) env stack = case get v env stack of
+    (Right err) -> Right err
+    (Left newstack) -> exec b env newstack
+exec (Instruction {line = _, command = "deleteEnv", value = Just v}:b) env stack = exec b (deleteEnv v env) stack
 exec (Instruction {line = l, command = "call", value = Just (AstSymbol s)}:b) env stack = case call (l, s) stack env of
     (Right err) -> Right err
     (Left newstack) -> exec b env newstack
 exec (Instruction {line = l, command = "jumpIfFalse", value = Just (AstInteger s)}:b) env (top:stack) = case jumpIfFalse b (s - l - 1) top of
     Right err -> Right err
     Left instructions -> exec instructions env (top:stack)
-
 exec (Instruction {line = _, command = "return", value = Nothing}:_) _ (val:stack) = Left val
 exec (Instruction {line = l, command = cmd, value = _}:_) _ (val:stack) = Right (cmd ++ " unknown call")
+exec [] _ _ = Right ("unexpected end")
+
 
 -- exec (Instruction {line = l, command = "get", value = Just v}:b) env stack = case push v stack of
