@@ -4,6 +4,7 @@ module Compile
     ) where
 
 import Lib
+import Eval
 
 appendInstruction :: (Either [Instruction] String) -> [Instruction] -> Env -> ((Either [Instruction] String), Int, Env)
 appendInstruction a ni env = case a of
@@ -66,10 +67,12 @@ defineInstruction :: Ast -> Int -> Env -> ((Either [Instruction] String), Int, E
 defineInstruction (AstDefine (Left s) (AstLambda args v)) i env = case compileExpression v 0 env of
     (Right err, _, nenv) -> (Right err, i, nenv)
     (Left a, _, nenv) -> (Left [], i, insertToTupleArray nenv s (Left (args, a)))
--- define var = define
+-- define var
 defineInstruction (AstDefine (Left s) v) i env = case compileExpression v i env of
     (Right err, ni, nenv) -> (Right err, ni, nenv)
-    (li, ni, nenv) -> (li, ni, nenv) -- call guillaume exec function
+    (Left li, ni, nenv) -> case exec li env [] of
+        Right err -> (Right err, ni, nenv)
+        Left val -> (Left [], i, insertToTupleArray nenv s (Right val))
 -- invalid define func
 defineInstruction (AstDefine (Right []) _) i env = (Right "define invalid call", i, env)
 -- define func = env

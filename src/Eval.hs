@@ -7,7 +7,8 @@ module Eval
         mult,
         division,
         modulo,
-        inferiorto
+        inferiorto,
+        equal
     ) where
 
 import Lib
@@ -22,6 +23,11 @@ setArgToEnv (name:ns) (val:vs) env = setArgToEnv ns vs (addToTupleArray env name
 extractNFromList :: [a] -> Int -> Either ([a], [a]) String
 extractNFromList l n = case length l >= n of
     True -> Left (take n l, drop n l)
+    False -> Right "Not enough elements from list"
+
+removeNFromList ::  [a] -> Int -> Either [a] String
+removeNFromList l n = case length l >= n of
+    True -> Left (drop n l)
     False -> Right "Not enough elements from list"
 
 stackPush :: Stack -> Ast -> Stack
@@ -63,31 +69,31 @@ ifcondition _ = Right "Error in the size of stack in ifcondition"
 
 add :: Function
 add (AstInteger a : AstInteger b : rest) = Left (AstInteger (b + a) : rest)
-add _ = Right "add invalid function call"
+add _ = Right "+ invalid function call"
 
 
 minus :: Function
 minus (AstInteger a : AstInteger b : rest) = Left (AstInteger (b - a) : rest)
-minus _ = Right "minus invalid function call"
+minus _ = Right "- invalid function call"
 
 
 mult :: Function
 mult (AstInteger a : AstInteger b : rest) = Left (AstInteger (b * a) : rest)
-mult _ = Right "mult invalid function call"
+mult _ = Right "* invalid function call"
 
 
 division :: Function
 division (AstInteger a : AstInteger b : rest)
-    | a == 0 = Right "division divide by zero"
+    | a == 0 = Right "div divide by zero"
     | otherwise = Left (AstInteger (b `div` a) : rest)
-division _ = Right "division invalid function call"
+division _ = Right "div invalid function call"
 
 
 modulo :: Function
 modulo (AstInteger a : AstInteger b : rest)
-    | a == 0 = Right "Divide by zero in function modulo"
+    | a == 0 = Right "mod divide by zero"
     | otherwise = Left (AstInteger (b `mod` a) : rest)
-modulo _ = Right "modulo invalid function call"
+modulo _ = Right "mod invalid function call"
 
 
 inferiorto :: Function
@@ -133,6 +139,12 @@ call (l, s) stack env = case isBuiltin stack (l, s) of
     (True, val) -> val
     (False, _) -> isFunc (l, s) stack env
 
+jumpIfFalse :: [Instruction] -> Int -> Ast -> Either [Instruction] String
+jumpIfFalse instructions lineJump (AstBoolean "#f") = case lineJump < 0 of
+    True -> Right "if invalid jump"
+    False -> removeNFromList instructions lineJump
+jumpIfFalse instructions lineJump (AstBoolean "#t") = Left instructions
+
 exec :: [Instruction] -> Env -> Stack -> Either Ast String
 exec (Instruction {line = _, command = "push", value = Just v}:b) env stack = case push v stack of
     (Left newstack) -> exec b env newstack
@@ -140,6 +152,11 @@ exec (Instruction {line = _, command = "push", value = Just v}:b) env stack = ca
 exec (Instruction {line = l, command = "call", value = Just (AstSymbol s)}:b) env stack = case call (l, s) stack env of
     (Right err) -> Right err
     (Left newstack) -> exec b env newstack
+exec (Instruction {line = l, command = "jumpIfFalse", value = Just (AstInteger s)}:b) env (top:stack) = case jumpIfFalse b (s - l - 1) top of
+    Right err -> Right err
+    Left instructions -> exec instructions env (top:stack)
+
 exec (Instruction {line = _, command = "return", value = Nothing}:_) _ (val:stack) = Left val
+exec (Instruction {line = l, command = cmd, value = _}:_) _ (val:stack) = Right (cmd ++ " unknown call")
 
 -- exec (Instruction {line = l, command = "get", value = Just v}:b) env stack = case push v stack of

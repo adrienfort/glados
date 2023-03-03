@@ -21,13 +21,9 @@ compileIfSpec = do
                     ], 6, [])
         it "(define x (if #t 1 0))" $ do
             compile [(AstDefine (Left "x") (AstCall [AstSymbol "if", AstBoolean "#t", AstInteger 1, AstInteger 0]))] 0 [] `shouldBe` (Left [
-                    Instruction {line = 0, command = "push", value = Just (AstBoolean "#t")},
-                    Instruction {line = 1, command = "jumpIfFalse", value = Just (AstInteger 4)},
-                    Instruction {line = 2, command = "push", value = Just (AstInteger 1)},
-                    Instruction {line = 3, command = "return", value = Nothing},
-                    Instruction {line = 4, command = "push", value = Just (AstInteger 0)},
-                    Instruction {line = 5, command = "return", value = Nothing}
-                    ], 6, [])
+                    ], 0, [
+                        ("x", Right (AstInteger 1))
+                    ])
 
 compileSimpleExpressionSpec :: Spec
 compileSimpleExpressionSpec = do
@@ -72,10 +68,7 @@ compileSimpleExpressionSpec = do
                 ])
         it "(define x 5)" $ do
             compile [AstDefine (Left "x") (AstInteger 5)] 0 [] `shouldBe` (Left [
-                Instruction {line = 0, command = "push", value = Just (AstInteger 5)},
-                Instruction {line = 1, command = "return", value = Nothing}
-                ], 2, [])
-                -- [("x", Right (AstInteger 5))])
+                ], 0, [("x", Right (AstInteger 5))])
 
 compileHardSpec :: Spec
 compileHardSpec = do
