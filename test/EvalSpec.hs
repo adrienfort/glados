@@ -19,6 +19,28 @@ pushSpec = do
             exec [Instruction {line = 0, command = "push", value = Just (AstSymbol "x")}] [] [] `shouldBe` (Right "Error in push")
         it "get error" $ do
             exec [Instruction {line = 0, command = "get", value = Just (AstSymbol "x")}] [] [] `shouldBe` (Right "x unknown variable")
+    
+
+    describe "jump" $ do
+        it "returns an empty list when given an empty list" $ do
+            jump [] 1 `shouldBe` []
+
+        it "returns the entire list when the given line number is not found" $ do
+            jump [
+                Instruction {line = 1, command = "push", value = Just (AstInteger 1)},
+                Instruction {line = 2, command = "push", value = Just (AstInteger 2)}
+                ] 3 `shouldBe` []
+
+        it "returns the list from the specified line number to the end" $ do
+            jump [
+                    Instruction {line = 1, command = "push", value = Just (AstInteger 1)},
+                    Instruction {line = 2, command = "push", value = Just (AstInteger 2)},
+                    Instruction {line = 3, command = "jump", value = Just (AstInteger 1)},
+                    Instruction {line = 4, command = "push", value = Just (AstInteger 3)}
+                ] 3 `shouldBe` [
+                    Instruction {line = 3, command = "jump", value = Just (AstInteger 1)},
+                    Instruction {line = 4, command = "push", value = Just (AstInteger 3)}
+                ]
 
 
 
