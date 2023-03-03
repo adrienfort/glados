@@ -1,7 +1,6 @@
 module Eval
     (
         exec,
-        ifcondition,
         add,
         minus,
         mult,
