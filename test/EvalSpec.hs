@@ -245,9 +245,9 @@ builtinsSpec = do
         it "< 1" $ do
             inferiorto [AstInteger (1)] `shouldBe` (Right "< invalid function call")
 
-    describe "equal with Stack" $ do
-        it "= 4 6" $ do
-            equal 
+    -- describe "equal with Stack" $ do
+    --     it "= 4 6" $ do
+    --         equal 
 
     -- describe "setArgToEnv" $ do
     --     it "% 6 4" $ do
