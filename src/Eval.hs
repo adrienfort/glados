@@ -12,41 +12,24 @@ module Eval
 
 import Lib
 
+setArgToEnv :: [String] -> Stack -> Env -> Env
+setArgToEnv [] [] env = env
+setArgToEnv [] _ env = env
+setArgToEnv _ [] env = env
+setArgToEnv (name:ns) (val:vs) env = setArgToEnv ns vs (addToTupleArray env name (Right val))
+
+-- In case of success return (extracted values, new stack)
+extractNFromList :: [a] -> Int -> Either ([a], [a]) String
+extractNFromList l n = case length l >= n of
+    True -> Left (take n l, drop n l)
+    False -> Right "Not enough elements from list"
+
 stackPush :: Stack -> Ast -> Stack
 stackPush a v = v : a
 
 stackPop :: Stack -> Stack
 stackPop [] = []
 stackPop (_:b) = b
-
--- envGetKey :: String -> Env -> Either Ast String
--- envGetKey str env = case lookup str env of
-        -- Nothing -> Right (str ++ " is undefined")
-        -- Just val -> Left val
--- 
--- add a key value and can replace an existing key value
--- envInsertKey :: String -> Ast -> Env -> Env
--- envInsertKey str ast env = case lookup str env of
-    -- Nothing -> (str, ast) : env
-    -- Just _ -> replaceKey env
-        -- where
-            -- replaceKey [] = []
-            -- replaceKey ((s, val) : b) | s == str = ((str, ast) : b)
-                                    -- | otherwise = ((s, val) : (replaceKey b))
-
-
--- instructions :: [Instruction]
--- instructions = [
-    -- Instruction {line = 0, command = "push", value = Just (AstInteger 0)},
-    -- Instruction {line = 1, command = "get", value = Just (AstSymbol "x")},
-    -- Instruction {line = 2, command = "call", value = Just (AstSymbol "eq?")},
-    -- Instruction {line = 3, command = "jumpIfFalse", value = Just (AstInteger 7)},
-    -- Instruction {line = 4, command = "push", value = Just (AstInteger 1)},
-    -- Instruction {line = 5, command = "return", value = Nothing},
-    -- Instruction {line = 6, command = "get", value = Just (AstSymbol "foo")},
-    -- Instruction {line = 7, command = "return", value = Nothing}
-    -- ]
-
 
 stack :: Stack
 stack = [
@@ -60,36 +43,13 @@ jump (x:xs) lineNum
     | line x == lineNum = x:xs
     | otherwise = jump xs lineNum
 
--- add a new key value
--- envAddKey :: String -> Ast -> Env -> Env
--- envAddKey str ast env = (str, ast) : env
-
 push :: Ast -> Stack -> Either Stack String
 push ast stack = case ast of
     (AstInteger _) -> Left (ast:stack)
     (AstBoolean _) -> Left (ast:stack)
     (_) -> Right "Error dans push"
 
-
--- load args into env -> pop stack with nbr args -> exec again -> add exec result ontop of stack
-transitFunc :: (Int, String) -> Stack -> Env -> Either Stack String
-transitFunc (l, s) stack env = Right "err"
-
--- checkBuiltin or Func :
--- Builtin => get builtin -> -> call builtin
--- Func => get definition -> -> send to transitFunc
-call :: (Int, String) -> Stack -> Env -> Either Stack String
-call (l, s) stack env = Right "err"
-
 -------------------------------- BUILTINS --------------------------------
--- ("if", ifcondition),
--- ("+", add),
--- ("-", minus),
--- ("*", mult),
--- ("div", division),
--- ("mod", modulo),
--- ("<", inferiorto),
--- ("eq?", equal)
 
 ifcondition :: Function
 ifcondition (AstInteger a : AstInteger b : rest) = case a == b of
@@ -103,49 +63,75 @@ ifcondition _ = Right "Error in the size of stack in ifcondition"
 
 add :: Function
 add (AstInteger a : AstInteger b : rest) = Left (AstInteger (b + a) : rest)
-add _ = Right "Error in the size of stack in add"
+add _ = Right "add invalid function call"
 
 
 minus :: Function
 minus (AstInteger a : AstInteger b : rest) = Left (AstInteger (b - a) : rest)
-minus _ = Right "Error in the size of stack in minus"
+minus _ = Right "minus invalid function call"
 
 
 mult :: Function
 mult (AstInteger a : AstInteger b : rest) = Left (AstInteger (b * a) : rest)
-mult _ = Right "Error in the size of stack in mult"
+mult _ = Right "mult invalid function call"
 
 
 division :: Function
 division (AstInteger a : AstInteger b : rest)
-    | a == 0 = Right "Divide by zero in function division"
+    | a == 0 = Right "division divide by zero"
     | otherwise = Left (AstInteger (b `div` a) : rest)
-division _ = Right "Error in the size of stack in division"
+division _ = Right "division invalid function call"
 
 
 modulo :: Function
 modulo (AstInteger a : AstInteger b : rest)
     | a == 0 = Right "Divide by zero in function modulo"
     | otherwise = Left (AstInteger (b `mod` a) : rest)
-modulo _ = Right "Error in the size of stack in modulo"
+modulo _ = Right "modulo invalid function call"
 
 
 inferiorto :: Function
 inferiorto (AstInteger a : AstInteger b : rest)
     | b < a = Left (AstBoolean "#t" : rest)
     | otherwise = Left (AstBoolean "#f" : rest)
-inferiorto _ = Right "Error in the size of stack in inferiorto"
+inferiorto _ = Right "< invalid function call"
 
+equal :: Function
+equal (a:b:rest) = case a == b of
+    True -> Left (AstBoolean "#t" : rest)
+    False -> Left (AstBoolean "#f" : rest)
+equal _ = Right "eq? invalid function call"
 
+getBuiltins :: [(String, Function)]
+getBuiltins = [
+        ("+", add),
+        ("-", minus),
+        ("*", mult),
+        ("div", division),
+        ("mod", modulo),
+        ("<", inferiorto),
+        ("eq?", equal)
+    ]
 
+isBuiltin :: Stack -> (Int, String) -> (Bool, Either Stack String)
+isBuiltin stack (l, s) = case searchTupleArray getBuiltins s of
+    Nothing -> (False, Left stack)
+    Just built -> (True, built stack)
 
--------------------------------- BUILTINS --------------------------------
+isFunc :: (Int, String) -> Stack -> Env -> Either Stack String
+isFunc (l, s) stack env = case searchTupleArray env s of
+    Nothing -> Right (s ++ " undefined function")
+    Just (Left (args, instructions)) -> case extractNFromList stack (length args) of
+        Right err -> Right err
+        Left (tempstack, newstack) -> case exec instructions (setArgToEnv args (reverse tempstack) env) [] of
+            Right err -> Right err
+            Left val -> Left (val : newstack)
+    _ -> Right (s ++ " not a function")
 
-
--- type Env = [(String, Either ([String], [Instruction]) Ast)]
-
--- getEnvValue :: String -> Env -> Stack -> Either 
-
+call :: (Int, String) -> Stack -> Env -> Either Stack String
+call (l, s) stack env = case isBuiltin stack (l, s) of
+    (True, val) -> val
+    (False, _) -> isFunc (l, s) stack env
 
 exec :: [Instruction] -> Env -> Stack -> Either Ast String
 exec (Instruction {line = _, command = "push", value = Just v}:b) env stack = case push v stack of
@@ -157,17 +143,3 @@ exec (Instruction {line = l, command = "call", value = Just (AstSymbol s)}:b) en
 exec (Instruction {line = _, command = "return", value = Nothing}:_) _ (val:stack) = Left val
 
 -- exec (Instruction {line = l, command = "get", value = Just v}:b) env stack = case push v stack of
-
--- type Env = [(String, Either ([String], [Instruction]) Ast)]
--- insertToTupleArray :: [(String, a)] -> String -> a -> [(String, a)]
-
-setArgToEnv :: [String] -> Stack -> Env -> Env
-setArgToEnv [] [] env = env
-setArgToEnv [] _ env = env
-setArgToEnv _ [] env = env
-setArgToEnv (name:ns) (val:vs) env = setArgToEnv ns vs (addToTupleArray env name (Right val))
-
-extractNFromList :: [a] -> Int -> Either ([a], [a]) String
-extractNFromList l n = case length l >= n of
-    True -> Left (take n l, drop n l)
-    False -> Right "Not enough elements from list"

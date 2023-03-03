@@ -6,7 +6,8 @@ module Lib (
         Stack,
         Function,
         insertToTupleArray,
-        addToTupleArray
+        addToTupleArray,
+        searchTupleArray
     ) where
 
 data Ast = AstInteger Int
@@ -79,3 +80,6 @@ insertToTupleArray list str v = case lookup str list of
 
 addToTupleArray :: [(String, a)] -> String -> a -> [(String, a)]
 addToTupleArray list str a = (str, a) : list
+
+searchTupleArray :: [(String, a)] -> String -> Maybe a
+searchTupleArray list str = lookup str list
