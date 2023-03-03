@@ -1,7 +1,6 @@
 module Eval
     (
         exec,
-        ifcondition,
         add,
         minus,
         mult,
@@ -50,16 +49,6 @@ push ast stack = case ast of
     (_) -> Right "Error dans push"
 
 -------------------------------- BUILTINS --------------------------------
-
-ifcondition :: Function
-ifcondition (AstInteger a : AstInteger b : rest) = case a == b of
-    (True) -> Left (AstBoolean "#t" : rest)
-    (False) -> Left (AstBoolean "#f" : rest)
-ifcondition (AstBoolean a : AstBoolean b : rest) = case a == b of
-    (True) -> Left (AstBoolean "#t" : rest)
-    (False) -> Left (AstBoolean "#f" : rest)
-ifcondition _ = Right "Error in the size of stack in ifcondition"
-
 
 add :: Function
 add (AstInteger a : AstInteger b : rest) = Left (AstInteger (b + a) : rest)
@@ -170,6 +159,3 @@ exec (Instruction {line = l, command = "jumpIfFalse", value = Just (AstInteger s
 exec (Instruction {line = _, command = "return", value = Nothing}:_) _ (val:stack) = Left val
 exec (Instruction {line = l, command = cmd, value = _}:_) _ (val:stack) = Right (cmd ++ " unknown call")
 exec [] _ _ = Right ("unexpected end")
-
-
--- exec (Instruction {line = l, command = "get", value = Just v}:b) env stack = case push v stack of
