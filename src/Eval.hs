@@ -51,14 +51,6 @@ push ast stack = case ast of
 
 -------------------------------- BUILTINS --------------------------------
 
-ifcondition :: Function
-ifcondition (AstInteger a : AstInteger b : rest) = case a == b of
-    (True) -> Left (AstBoolean "#t" : rest)
-    (False) -> Left (AstBoolean "#f" : rest)
-ifcondition (AstBoolean a : AstBoolean b : rest) = case a == b of
-    (True) -> Left (AstBoolean "#t" : rest)
-    (False) -> Left (AstBoolean "#f" : rest)
-ifcondition _ = Right "Error in the size of stack in ifcondition"
 
 
 add :: Function
