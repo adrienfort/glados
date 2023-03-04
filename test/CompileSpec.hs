@@ -114,6 +114,43 @@ compileHardSpec = do
                         Instruction {line = 12, command = "return", value = Nothing}
                     ])
                 )])
+        it "(define (fib-it a b n) (if (< n 1) a (fib-it b (+ a b) (- n 1)))) (define (fib n) (fib-it 0 1 n)) (fib 20)" $ do
+            compile [AstDefine (Right ["fib-it", "a", "b", "n"])
+                (AstCall [AstSymbol "if", AstCall [AstSymbol "<", AstSymbol "n", AstInteger 1],
+                AstSymbol "a", AstCall [AstSymbol "fib-it", AstSymbol "b",
+                AstCall [AstSymbol "+", AstSymbol "a", AstSymbol "b"], AstCall [AstSymbol "-", AstSymbol "n", AstInteger 1]]]),
+                AstDefine (Right ["fib", "n"]) (AstCall [AstSymbol "fib-it", AstInteger 0, AstInteger 1, AstSymbol "n"]),
+                AstCall [AstSymbol "fib", AstInteger 20]] 0 [] `shouldBe` (
+                Left [
+                    Instruction {line = 0, command = "push", value = Just (AstInteger 20)},
+                    Instruction {line = 1, command = "call", value = Just (AstSymbol "fib")},
+                    Instruction {line = 2, command = "return", value = Nothing}
+                ], 3, [
+                    ("fib", Left (["n"], [
+                        Instruction {line = 0, command = "push", value = Just (AstInteger 0)},
+                        Instruction {line = 1, command = "push", value = Just (AstInteger 1)},
+                        Instruction {line = 2, command = "get", value = Just (AstSymbol "n")},
+                        Instruction {line = 3, command = "call", value = Just (AstSymbol "fib-it")},
+                        Instruction {line = 4, command = "return", value = Nothing}
+                    ])),
+                    ("fib-it", Left (["a", "b", "n"], [
+                        Instruction {line = 0, command = "get", value = Just (AstSymbol "n")},
+                        Instruction {line = 1, command = "push", value = Just (AstInteger 1)},
+                        Instruction {line = 2, command = "call", value = Just (AstSymbol "<")},
+                        Instruction {line = 3, command = "jumpIfFalse", value = Just (AstInteger 6)},
+                        Instruction {line = 4, command = "get", value = Just (AstSymbol "a")},
+                        Instruction {line = 5, command = "return", value = Nothing},
+                        Instruction {line = 6, command = "get", value = Just (AstSymbol "b")},
+                        Instruction {line = 7, command = "get", value = Just (AstSymbol "a")},
+                        Instruction {line = 8, command = "get", value = Just (AstSymbol "b")},
+                        Instruction {line = 9, command = "call", value = Just (AstSymbol "+")},
+                        Instruction {line = 10, command = "get", value = Just (AstSymbol "n")},
+                        Instruction {line = 11, command = "push", value = Just (AstInteger 1)},
+                        Instruction {line = 12, command = "call", value = Just (AstSymbol "-")},
+                        Instruction {line = 13, command = "call", value = Just (AstSymbol "fib-it")},
+                        Instruction {line = 14, command = "return", value = Nothing}
+                    ]))
+                ])
 
 compileTrickySpec :: Spec
 compileTrickySpec = do

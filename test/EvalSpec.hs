@@ -122,7 +122,37 @@ compileSpec = do
                     ])
                 )
                 ] [] `shouldBe` (Left (AstInteger 3628800))
-
+-- exec :: [Instruction] -> Env -> Stack -> Either Ast String
+        it "(define (fib-it a b n) (if (< n 1) a (fib-it b (+ a b) (- n 1)))) (define (fib n) (fib-it 0 1 n)) (fib 20)" $ do
+            exec [
+                Instruction {line = 0, command = "push", value = Just (AstInteger 20)},
+                Instruction {line = 1, command = "call", value = Just (AstSymbol "fib")},
+                Instruction {line = 2, command = "return", value = Nothing}
+                ] [
+                ("fib", Left (["n"], [
+                    Instruction {line = 0, command = "push", value = Just (AstInteger 0)},
+                    Instruction {line = 1, command = "push", value = Just (AstInteger 1)},
+                    Instruction {line = 2, command = "get", value = Just (AstSymbol "n")},
+                    Instruction {line = 3, command = "call", value = Just (AstSymbol "fib-it")},
+                    Instruction {line = 4, command = "return", value = Nothing}
+                ])),
+                ("fib-it", Left (["a", "b", "n"], [
+                    Instruction {line = 0, command = "get", value = Just (AstSymbol "n")},
+                    Instruction {line = 1, command = "push", value = Just (AstInteger 1)},
+                    Instruction {line = 2, command = "call", value = Just (AstSymbol "<")},
+                    Instruction {line = 3, command = "jumpIfFalse", value = Just (AstInteger 6)},
+                    Instruction {line = 4, command = "get", value = Just (AstSymbol "a")},
+                    Instruction {line = 5, command = "return", value = Nothing},
+                    Instruction {line = 6, command = "get", value = Just (AstSymbol "b")},
+                    Instruction {line = 7, command = "get", value = Just (AstSymbol "a")},
+                    Instruction {line = 8, command = "get", value = Just (AstSymbol "b")},
+                    Instruction {line = 9, command = "call", value = Just (AstSymbol "+")},
+                    Instruction {line = 10, command = "get", value = Just (AstSymbol "n")},
+                    Instruction {line = 11, command = "push", value = Just (AstInteger 1)},
+                    Instruction {line = 12, command = "call", value = Just (AstSymbol "-")},
+                    Instruction {line = 13, command = "call", value = Just (AstSymbol "fib-it")},
+                    Instruction {line = 14, command = "return", value = Nothing}
+                ]))] [] `shouldBe` (Left (AstInteger 6765))
         it "compile fact" $ do
             exec [
                 Instruction {line = 0, command = "push", value = Just (AstInteger 1)},
