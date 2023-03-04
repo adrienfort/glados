@@ -133,14 +133,14 @@ spec = do
     describe "empty" $ do
         it "no" $ do
             1 `shouldBe` 1
-    -- parseCharSpec
-    -- parseAnyCharSpec
-    -- parseOrSpec
-    -- parseAndSpec
-    -- parseAndWithSpec
-    -- parseManySpec
-    -- parseSomeSpec
-    -- parseUIntSpec
-    -- parseIntSpec
-    -- parsePairSpec
-    -- parseListSpec
+    parseCharSpec
+    parseAnyCharSpec
+    parseOrSpec
+    parseAndSpec
+    parseAndWithSpec
+    parseManySpec
+    parseSomeSpec
+    parseUIntSpec
+    parseIntSpec
+    parsePairSpec
+    parseListSpec

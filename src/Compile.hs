@@ -133,8 +133,6 @@ filterDefines [] = []
 filterDefines (AstDefine n v:b) = (AstDefine n v) : filterDefines b
 filterDefines (_:b) = filterDefines b
 
--- compile (startCptToAst (parse content)) 0 []
-
 importFile :: String -> Either Env String
 importFile file = case result of
     Left _ -> Right "import invalid call"

@@ -20,7 +20,6 @@ data Ast = AstInteger Int
     | AstLambda [String] Ast
     deriving (Show)
 
-
 type Env = [(String, Either ([String], [Instruction]) Ast)]
 type Stack = [Ast]
 type Function = Stack -> Either Stack String
