@@ -267,6 +267,12 @@ evalSpec = do
             setArgToEnv [] [AstInteger 1] [] `shouldBe` []
         it "test 2" $ do
             setArgToEnv ["helloword"] [] [] `shouldBe` []
+    describe "extractNFromList" $ do
+        it "test error" $ do
+            extractNFromList ["helloword"] 2 `shouldBe` (Right "Not enough elements from list")
+    describe "removeNFromList" $ do
+        it "test error" $ do
+            removeNFromList ["helloword"] 2 `shouldBe` (Right "Not enough elements from list")
 
 
 

@@ -12,7 +12,9 @@ module Eval
         jump,
         deleteEnv,
         stackPush,
-        stackPop
+        stackPop,
+        extractNFromList,
+        removeNFromList
     ) where
 
 import Lib
