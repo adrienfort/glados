@@ -262,6 +262,11 @@ evalSpec = do
             stackPop [AstInteger 1, AstBoolean "#f"] `shouldBe` [AstBoolean "#f"]
         it "test 3" $ do
             stackPop [] `shouldBe` []
+    describe "setArgToEnv" $ do
+        it "test 1" $ do
+            setArgToEnv [] [AstInteger 1] [] `shouldBe` []
+        it "test 2" $ do
+            setArgToEnv ["helloword"] [] [] `shouldBe` []
 
 
 
