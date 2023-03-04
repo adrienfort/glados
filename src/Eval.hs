@@ -10,7 +10,9 @@ module Eval
         equal,
         setArgToEnv,
         jump,
-        deleteEnv
+        deleteEnv,
+        stackPush,
+        stackPop
     ) where
 
 import Lib

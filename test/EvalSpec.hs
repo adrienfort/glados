@@ -235,6 +235,10 @@ execSpec = do
             exec [Instruction {line = 0, command = "push", value = Just (AstSymbol "x")}] [] [] `shouldBe` (Right "Error in push")
         it "get error" $ do
             exec [Instruction {line = 0, command = "get", value = Just (AstSymbol "x")}] [] [] `shouldBe` (Right "x unknown variable")
+        -- it "jumpIfFalse error" $ do
+        --     exec [Instruction {line = 0, command = "jumpIfFalse", value = Just (AstInteger 2)}] [] [AstBoolean "#f"] `shouldBe` (Right "if invalid jump")
+        -- it "cmd error" $ do
+        --     exec [Instruction {line = 0, command = "helloworld", value = Just (AstInteger 2)}] [] [] `shouldBe` (Right "helloworld unknown call")
 
 
 evalSpec :: Spec
@@ -246,6 +250,20 @@ evalSpec = do
             deleteEnv (AstSymbol "z") [("x", Right (AstInteger 1)), ("y", Right (AstInteger 2))] `shouldBe` [("x", Right (AstInteger 1)), ("y", Right (AstInteger 2))]
         it "test 3" $ do
             deleteEnv (AstSymbol "x") [("x", Right (AstInteger 1))] `shouldBe` []
+    describe "stackPush function" $ do
+        it "test 1" $ do
+            stackPush [AstInteger 2] (AstSymbol "x") `shouldBe` [AstSymbol "x", AstInteger 2]
+        it "test 2" $ do
+            stackPush [] (AstInteger 1) `shouldBe` [AstInteger 1]
+    describe "stackPop function" $ do
+        it "test 1" $ do
+            stackPop [AstInteger 1] `shouldBe` []
+        it "test 2" $ do
+            stackPop [AstInteger 1, AstBoolean "#f"] `shouldBe` [AstBoolean "#f"]
+        it "test 3" $ do
+            stackPop [] `shouldBe` []
+
+
 
 
 spec :: Spec
