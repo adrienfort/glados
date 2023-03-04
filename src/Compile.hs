@@ -122,8 +122,22 @@ compileExpression a i env = case astToInstructions a i env of
     (Left il, index, nenv) -> (Left (il ++
         [Instruction {line = index, command = "return", value = Nothing}]), index + 1, nenv)
 
+-- read file
+-- parse file
+-- filter file defines
+-- cptToAst
+-- compile
+filterDefines :: [Cpt] -> [Cpt]
+filterDefines [] = []
+filterDefines (CptLists (CptSymbols "define":xs):b) = CptLists (CptSymbols "define":xs) : filterDefines b
+filterDefines (_:b) = filterDefines b
+
+importFile :: String -> Int -> Env -> (Either [Instruction] String, Int, Env)
+importFile file i env = (Right "ok", i, env)
+
 compile :: [Ast] -> Int -> Env -> ((Either [Instruction] String), Int, Env)
 compile [] i env = (Left [], i, env)
+compile (AstCall (AstSymbol"import":AstSymbol file:[]):b) i env = importFile file i env
 compile (a:b) i env = case compileExpression a i env of
     (Right err, ni, nenv) -> (Right err, ni, nenv)
     (Left x, index, nenv) -> case compile b index nenv of

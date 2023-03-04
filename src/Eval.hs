@@ -139,10 +139,12 @@ get (AstSymbol s) env stack = case searchTupleArray env s of
     Nothing -> Right (s ++ " unknown variable")
     Just (Right var) -> Left (var:stack)
     Just (Left _) -> Right (s ++ " invalid value")
+get _ env stack = Right ("? unknown variable")
 
 -- delete symbol from env
 deleteEnv :: Ast -> Env -> Env
 deleteEnv (AstSymbol s) env = removeFromTupleArray env s
+deleteEnv _ env = env
 
 -- deleteEnv 
 exec :: [Instruction] -> Env -> Stack -> Either Ast String
