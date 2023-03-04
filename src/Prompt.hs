@@ -32,7 +32,7 @@ readInput a (s, e) env = case s == e of
             Right err -> return (err, nenv)
             Left value -> return (show value, nenv)
         where
-            (instructions, line, nenv) = compile (startCptToAst (parse a)) 0 env
+            (instructions, line, nenv) = compile (cptToAst (parse a)) 0 env
 
 prompt :: Env -> IO ()
 prompt env = isEOF >>= \eof -> case eof of

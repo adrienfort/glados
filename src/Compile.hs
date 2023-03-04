@@ -138,7 +138,7 @@ filterDefines (_:b) = filterDefines b
 importFile :: String -> Either Env String
 importFile file = case result of
     Left _ -> Right "import invalid call"
-    Right content -> case compile (filterDefines (startCptToAst (parse content))) 0 [] of
+    Right content -> case compile (filterDefines (cptToAst (parse content))) 0 [] of
         (Right err, _, _) -> Right ("in imported file \"" ++ file ++ "\": " ++ err)
         (Left _, _, env) -> Left env
     where
