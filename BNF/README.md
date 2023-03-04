@@ -1,3 +1,4 @@
+```
 <program> ::= <statement> | <statement> <program>
 
 <statement> ::= <import> | <assignment> | <expression> | <comment>
@@ -33,3 +34,4 @@
 <symbol> ::= "-" | "_" | "." | "?" | "!"
 
 <comment> ::= "#" <char>* "\n"
+```
