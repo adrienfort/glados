@@ -120,6 +120,20 @@ compileTrickySpec = do
     describe "tricky test" $ do
         it "1 (+ 2)" $ do
             compile [AstInteger 1, AstCall [AstSymbol "+", AstInteger 2]] 0 [] `shouldBe` (Right "+ invalid call", 2, [])
+        it "(define (x) (+ 1 (if #t 1 0)))" $ do
+            compile [AstDefine (Right ["x"]) (AstCall [AstSymbol "+", AstInteger 1, AstCall [AstSymbol "if", AstBoolean "#t", AstInteger 1, AstInteger 0]])] 0 [] `shouldBe`
+                (Left [], 0, [
+                    ("x", Left ([], [
+                        Instruction {line = 0, command = "push", value = Just (AstInteger 1)},
+                        Instruction {line = 1, command = "push", value = Just (AstBoolean "#t")},
+                        Instruction {line = 2, command = "jumpIfFalse", value = Just (AstInteger 5)},
+                        Instruction {line = 3, command = "push", value = Just (AstInteger 1)},
+                        Instruction {line = 4, command = "jump", value = Just (AstInteger 6)},
+                        Instruction {line = 5, command = "push", value = Just (AstInteger 0)},
+                        Instruction {line = 6, command = "call", value = Just (AstSymbol "+")},
+                        Instruction {line = 7, command = "return", value = Nothing}
+                    ]))
+                ])
 
 spec :: Spec
 spec = do

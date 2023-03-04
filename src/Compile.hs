@@ -62,7 +62,7 @@ astToInstructions (AstLambda args v) i env = case astToInstructions v i env of
     (Right err, ni, nenv) -> (Right err, ni, nenv)
     (Left li, ni, nenv) -> appendInstruction (Left li) [Instruction {line = ni, command = "call", value = Just (AstSymbol "lambda")},
         Instruction {line = ni + 1, command = "deleteEnv", value = Just (AstSymbol "lambda")}] (nenv ++ [("lambda", Left (args, li))]) -- to tail
-astToInstructions (AstCall (AstSymbol "if":b)) i env = ifToInstructions i (AstCall (AstSymbol "if":b)) i env
+astToInstructions (AstCall (AstSymbol "if":b)) i env = ifToInstructions 0 (AstCall (AstSymbol "if":b)) i env
 astToInstructions (AstCall (a:b)) i env = case callToInstructions (AstCall (a:b)) i env of
     (Right err, ni, nenv) -> (Right err, ni, nenv)
     (li, ni, nenv) -> appendInstruction li [Instruction {line = ni, command = "call", value = Just a}] nenv
@@ -77,13 +77,14 @@ ifToInstructions r (AstCall (_:cond:yes:no:[])) i env = case r of
         lyes, Left [Instruction {line = iy, command = "return", value = Nothing}],
         lno, Left [Instruction {line = ino, command = "return", value = Nothing}]], ino + 1, nenv)
     0 -> (ifList [
-        lcond, (Left [Instruction {line = ic, command = "jumpIfFalse", value = Just (AstInteger (iy + r))}]),
-        lyes, lno], ino, nenv)
+        lcond, (Left [Instruction {line = ic, command = "jumpIfFalse", value = Just (AstInteger (iy + 1))}]),
+        lyes, Left [Instruction {line = iy, command = "jump", value = Just (AstInteger ino)}], -- jump end of false
+        lno], ino, nenv)
     _ -> (Right "if invalid call", i, env)
     where
         (lcond, ic, cenv) = astToInstructions cond i env -- cond 
         (lyes, iy, yenv) = astToInstructions yes (ic + 1) cenv -- cond + jump + true
-        (lno, ino, nenv) = astToInstructions no (iy + r) yenv -- cond + jump + true + (return ?) + false
+        (lno, ino, nenv) = astToInstructions no (iy + 1) yenv -- cond + jump + true + return | jump + false
         ifList :: [(Either [Instruction] String)] -> (Either [Instruction] String)
         ifList [] = Left []
         ifList (a:b) = case a of

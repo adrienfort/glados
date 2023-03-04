@@ -136,6 +136,11 @@ jumpIfFalse instructions lineJump (AstBoolean "#f") = case lineJump < 0 of
 jumpIfFalse instructions _ (AstBoolean "#t") = Left instructions
 jumpIfFalse _ _ _ = Right "if invalid jump"
 
+jumpNoCond :: [Instruction] -> Int -> Either [Instruction] String
+jumpNoCond instructions lineJump = case lineJump < 0 of
+    True -> Right "invalid jump"
+    False -> removeNFromList instructions lineJump
+
 -- push symbol value from env
 get :: Ast -> Env -> Stack -> Either Stack String
 get (AstSymbol s) env stack = case searchTupleArray env s of
@@ -163,7 +168,10 @@ exec (Instruction {line = l, command = "call", value = Just (AstSymbol s)}:b) en
     (Left newstack) -> exec b env newstack
 exec (Instruction {line = l, command = "jumpIfFalse", value = Just (AstInteger s)}:b) env (top:stack) = case jumpIfFalse b (s - l - 1) top of
     Right err -> Right err
-    Left instructions -> exec instructions env (top:stack)
+    Left instructions -> exec instructions env stack
+exec (Instruction {line = l, command = "jump", value = Just (AstInteger s)}:b) env stack = case jumpNoCond b (s - l - 1) of
+    Right err -> Right err
+    Left instructions -> exec instructions env stack
 exec (Instruction {line = _, command = "return", value = Nothing}:_) _ (val:_) = Left val
 exec (Instruction {line = _, command = cmd, value = _}:_) _ _ = Right (cmd ++ " unknown call")
 exec _ _ _ = Right ("unexpected end")
