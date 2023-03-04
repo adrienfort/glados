@@ -86,6 +86,7 @@ addToTupleArray list str a = (str, a) : list
 addMultipleToTupleArray :: [(String, a)] -> [String] -> [a] -> [(String, a)]
 addMultipleToTupleArray list [] [] = list
 addMultipleToTupleArray list (str:ns) (a:na) = addMultipleToTupleArray ((str, a) : list) ns na
+addMultipleToTupleArray list _ _ = list
 
 searchTupleArray :: [(String, a)] -> String -> Maybe a
 searchTupleArray list str = lookup str list

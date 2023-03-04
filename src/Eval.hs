@@ -110,12 +110,12 @@ getBuiltins = [
     ]
 
 isBuiltin :: Stack -> (Int, String) -> (Bool, Either Stack String)
-isBuiltin stack (l, s) = case searchTupleArray getBuiltins s of
+isBuiltin stack (_, s) = case searchTupleArray getBuiltins s of
     Nothing -> (False, Left stack)
     Just built -> (True, built stack)
 
 isFunc :: (Int, String) -> Stack -> Env -> Either Stack String
-isFunc (l, s) stack env = case searchTupleArray env s of
+isFunc (_, s) stack env = case searchTupleArray env s of
     Nothing -> Right (s ++ " undefined function")
     Just (Left (args, instructions)) -> case extractNFromList stack (length args) of
         Right err -> Right err
@@ -133,9 +133,8 @@ jumpIfFalse :: [Instruction] -> Int -> Ast -> Either [Instruction] String
 jumpIfFalse instructions lineJump (AstBoolean "#f") = case lineJump < 0 of
     True -> Right "if invalid jump"
     False -> removeNFromList instructions lineJump
-jumpIfFalse instructions lineJump (AstBoolean "#t") = Left instructions
-
--- type Env = [(String, Either ([String], [Instruction]) Ast)]
+jumpIfFalse instructions _ (AstBoolean "#t") = Left instructions
+jumpIfFalse _ _ _ = Right "if invalid jump"
 
 -- push symbol value from env
 get :: Ast -> Env -> Stack -> Either Stack String
@@ -143,7 +142,7 @@ get (AstSymbol s) env stack = case searchTupleArray env s of
     Nothing -> Right (s ++ " unknown variable")
     Just (Right var) -> Left (var:stack)
     Just (Left _) -> Right (s ++ " invalid value")
-get _ env stack = Right ("? unknown variable")
+get _ _ _ = Right ("? unknown variable")
 
 -- delete symbol from env
 deleteEnv :: Ast -> Env -> Env
@@ -165,6 +164,6 @@ exec (Instruction {line = l, command = "call", value = Just (AstSymbol s)}:b) en
 exec (Instruction {line = l, command = "jumpIfFalse", value = Just (AstInteger s)}:b) env (top:stack) = case jumpIfFalse b (s - l - 1) top of
     Right err -> Right err
     Left instructions -> exec instructions env (top:stack)
-exec (Instruction {line = _, command = "return", value = Nothing}:_) _ (val:stack) = Left val
-exec (Instruction {line = l, command = cmd, value = _}:_) _ (val:stack) = Right (cmd ++ " unknown call")
-exec [] _ _ = Right ("unexpected end")
+exec (Instruction {line = _, command = "return", value = Nothing}:_) _ (val:_) = Left val
+exec (Instruction {line = _, command = cmd, value = _}:_) _ _ = Right (cmd ++ " unknown call")
+exec _ _ _ = Right ("unexpected end")

@@ -3,8 +3,13 @@ module Compile
         compile
     ) where
 
+import System.IO.Unsafe (unsafePerformIO)
+import System.IO.Error (catchIOError)
+
 import Lib
-import Eval
+import CptToAst
+import CPT.Cpt
+import Eval (exec)
 
 getcBuiltins :: [(String, Int)]
 getcBuiltins = [
@@ -122,22 +127,27 @@ compileExpression a i env = case astToInstructions a i env of
     (Left il, index, nenv) -> (Left (il ++
         [Instruction {line = index, command = "return", value = Nothing}]), index + 1, nenv)
 
--- read file
--- parse file
--- filter file defines
--- cptToAst
--- compile
-filterDefines :: [Cpt] -> [Cpt]
+filterDefines :: [Ast] -> [Ast]
 filterDefines [] = []
-filterDefines (CptLists (CptSymbols "define":xs):b) = CptLists (CptSymbols "define":xs) : filterDefines b
+filterDefines (AstDefine n v:b) = (AstDefine n v) : filterDefines b
 filterDefines (_:b) = filterDefines b
 
-importFile :: String -> Int -> Env -> (Either [Instruction] String, Int, Env)
-importFile file i env = (Right "ok", i, env)
+-- compile (startCptToAst (parse content)) 0 []
 
-compile :: [Ast] -> Int -> Env -> ((Either [Instruction] String), Int, Env)
+importFile :: String -> Either Env String
+importFile file = case result of
+    Left _ -> Right "import invalid call"
+    Right content -> case compile (filterDefines (startCptToAst (parse content))) 0 [] of
+        (Right err, _, _) -> Right ("in imported file \"" ++ file ++ "\": " ++ err)
+        (Left _, _, env) -> Left env
+    where
+        result = unsafePerformIO (catchIOError (Right <$> readFile file) (\e -> return $ Left $ show e))
+
+compile :: [Ast] -> Int -> Env -> (Either [Instruction] String, Int, Env)
 compile [] i env = (Left [], i, env)
-compile (AstCall (AstSymbol"import":AstSymbol file:[]):b) i env = importFile file i env
+compile (AstCall (AstSymbol"import":AstSymbol file:[]):b) i env = case importFile file of
+    Right err -> (Right err, i, env)
+    Left nenv -> compile b i nenv
 compile (a:b) i env = case compileExpression a i env of
     (Right err, ni, nenv) -> (Right err, ni, nenv)
     (Left x, index, nenv) -> case compile b index nenv of
