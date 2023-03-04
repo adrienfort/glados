@@ -6,6 +6,18 @@ module Compile
 import Lib
 import Eval
 
+getcBuiltins :: [(String, Int)]
+getcBuiltins = [
+    ("+", 2),
+    ("-", 2),
+    ("*", 2),
+    ("div", 2),
+    ("mod", 2),
+    ("<", 2),
+    ("eq?", 2),
+    ("if", 3)
+    ]
+
 appendInstruction :: (Either [Instruction] String) -> [Instruction] -> Env -> ((Either [Instruction] String), Int, Env)
 appendInstruction a ni env = case a of
     (Right err) -> (Right err, line (last ni), env)
@@ -21,8 +33,22 @@ astListToInstructions (a:b) i env = case astToInstructions a i env of
 
 callToInstructions :: Ast -> Int -> Env -> ((Either [Instruction] String), Int, Env)
 callToInstructions (AstCall []) i env = (Right "? invalid call", i, env)
-callToInstructions (AstCall (_:b)) i env = astListToInstructions b i env
+callToInstructions (AstCall (AstSymbol name:b)) i env = case searchTupleArray getcBuiltins name of
+    Just (nbr) -> case length b == nbr of
+        False -> (Right (name ++ " invalid call"), i, env)
+        True -> astListToInstructions b i env
+    Nothing -> case searchTupleArray env name of
+        Nothing -> (Right (name ++ " is undefined"), i, env)
+        Just (Left (args, _)) -> case length b == length args of
+            False -> (Right (name ++ " invalid call"), i, env)
+            True -> astListToInstructions b i env
+        Just (Right _) -> (Right (name ++ " invalid call"), i, env)
 callToInstructions _ i env = (Right "? invalid call", i, env)
+
+symbolToInstructions :: String -> Int -> Env -> ((Either [Instruction] String), Int, Env)
+symbolToInstructions a i env = case searchTupleArray env a of
+    Nothing -> (Right (a ++ " is undefined"), i, env)
+    Just _ -> (Left [Instruction {line = i, command = "get", value = Just (AstSymbol a)}], i + 1, env)
 
 astToInstructions :: Ast -> Int -> Env -> ((Either [Instruction] String), Int, Env)
 -- Lambda format :
@@ -35,7 +61,7 @@ astToInstructions (AstCall (AstSymbol "if":b)) i env = ifToInstructions i (AstCa
 astToInstructions (AstCall (a:b)) i env = case callToInstructions (AstCall (a:b)) i env of
     (Right err, ni, nenv) -> (Right err, ni, nenv)
     (li, ni, nenv) -> appendInstruction li [Instruction {line = ni, command = "call", value = Just a}] nenv
-astToInstructions (AstSymbol a) i env = (Left [Instruction {line = i, command = "get", value = Just (AstSymbol a)}], i + 1, env)
+astToInstructions (AstSymbol a) i env = symbolToInstructions a i env
 astToInstructions (AstDefine _ _) i env = (Right "define invalid call", i, env)
 astToInstructions a i env = (Left [Instruction {line = i, command = "push", value = Just a}], i + 1, env)
 
@@ -62,23 +88,30 @@ ifToInstructions r (AstCall (_:cond:yes:no:[])) i env = case r of
             Right err -> Right err
 ifToInstructions _ _ i env = (Right "if invalid call", i, env)
 
+setEmptyArgsToEnv :: Env -> [String] -> Env
+setEmptyArgsToEnv list [] = list
+setEmptyArgsToEnv list (str:ns) = setEmptyArgsToEnv ((str, Left ([], [])) : list) ns
+
 defineInstruction :: Ast -> Int -> Env -> ((Either [Instruction] String), Int, Env)
 -- define lambda = env
-defineInstruction (AstDefine (Left s) (AstLambda args v)) i env = case compileExpression v 0 env of
-    (Right err, _, nenv) -> (Right err, i, nenv)
-    (Left a, _, nenv) -> (Left [], i, insertToTupleArray nenv s (Left (args, a)))
+defineInstruction (AstDefine (Left s) (AstLambda args v)) i env = case
+    compileExpression v 0 (setEmptyArgsToEnv (insertToTupleArray env s (Left (args, []))) args) of
+        (Right err, _, nenv) -> (Right err, i, nenv)
+        (Left a, _, _) -> (Left [], i, insertToTupleArray env s (Left (args, a)))
 -- define var
-defineInstruction (AstDefine (Left s) v) i env = case compileExpression v i env of
-    (Right err, ni, nenv) -> (Right err, ni, nenv)
-    (Left li, ni, nenv) -> case exec li env [] of
-        Right err -> (Right err, ni, nenv)
-        Left val -> (Left [], i, insertToTupleArray nenv s (Right val))
+defineInstruction (AstDefine (Left s) v) i env = case
+    compileExpression v i (insertToTupleArray env s (Left ([], []))) of
+        (Right err, ni, nenv) -> (Right err, ni, nenv)
+        (Left li, ni, nenv) -> case exec li env [] of
+            Right err -> (Right err, ni, nenv)
+            Left val -> (Left [], i, insertToTupleArray nenv s (Right val))
 -- invalid define func
 defineInstruction (AstDefine (Right []) _) i env = (Right "define invalid call", i, env)
 -- define func = env
-defineInstruction (AstDefine (Right (s:b)) v) i env = case compileExpression v 0 env of
-    (Right err, _, nenv) -> (Right err, i, nenv)
-    (Left a, _, nenv) -> (Left [], i, insertToTupleArray nenv s (Left (b, a)))
+defineInstruction (AstDefine (Right (s:b)) v) i env = case
+    compileExpression v 0 (setEmptyArgsToEnv (insertToTupleArray env s (Left (b, []))) b) of
+        (Right err, _, nenv) -> (Right err, i, nenv)
+        (Left a, _, _) -> (Left [], i, insertToTupleArray env s (Left (b, a)))
 defineInstruction _ i env = (Right "? invalid call", i, env)
 
 compileExpression :: Ast -> Int -> Env -> ((Either [Instruction] String), Int, Env)
@@ -86,7 +119,8 @@ compileExpression (AstDefine a v) i env = defineInstruction (AstDefine a v) i en
 compileExpression (AstCall (AstSymbol "if":b)) i env = ifToInstructions 1 (AstCall (AstSymbol "if":b)) i env
 compileExpression a i env = case astToInstructions a i env of
     (Right err, _, nenv) -> (Right err, i, nenv)
-    (Left il, index, nenv) -> (Left (il ++ [Instruction {line = index, command = "return", value = Nothing}]), index + 1, nenv)
+    (Left il, index, nenv) -> (Left (il ++
+        [Instruction {line = index, command = "return", value = Nothing}]), index + 1, nenv)
 
 compile :: [Ast] -> Int -> Env -> ((Either [Instruction] String), Int, Env)
 compile [] i env = (Left [], i, env)
