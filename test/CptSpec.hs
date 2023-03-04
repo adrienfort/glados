@@ -20,6 +20,8 @@ parseSourceCodeSucceeds = do
             (CptLists [CptInteger 1,CptInteger 2,CptInteger 3]) `shouldBe` (parse "(1 2 3)")
         it "success8" $ do
             (CptLists [CptLists [CptSymbols "foo",CptSymbols "bar",CptSymbols "baz"],CptLists [CptInteger 1,CptInteger 2,CptInteger 3],CptLists [],CptLists [CptLists [CptLists [CptLists [CptInteger 1,CptLists [CptInteger 2],CptInteger 3]]]]]) `shouldBe` (parse "(( foo bar baz )\n(1 2 3) ()\n((((1(2) 3) ) ) )\n)")
+        it "success9" $ do
+            (CptLists [CptLists [CptSymbols "foo",CptSymbols "bar",CptSymbols "baz"],CptLists [CptInteger 1,CptInteger 2,CptInteger 3],CptLists [],CptLists [CptLists [CptLists [CptLists [CptInteger 1,CptLists [CptInteger 2],CptInteger 3]]]]]) `shouldBe` (parse "(( foo bar baz ) # comment 1\n(1 2 3) ()#comment 2\n((((1(2) 3) ) ) )     #comment 3\n)")
 
 spec :: Spec
 spec = do
