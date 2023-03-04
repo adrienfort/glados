@@ -2,7 +2,9 @@
 
 ## Introduction
 
-...todo
+The goal of this project is to write from scratch a new language compiler. Written in haskell this project consists in imaging and programming a new logical but also a unique syntax.
+
+We inspired ourselves from S-Expression and add some syntactic sugars. For more details look in BNF for the complete syntax.
 
 You can find the subject [here](./.github/assets/subject.pdf).
 
