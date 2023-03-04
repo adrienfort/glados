@@ -10,7 +10,7 @@ module Eval
         equal,
         setArgToEnv,
         jump,
-        getBuiltins
+        deleteEnv
     ) where
 
 import Lib

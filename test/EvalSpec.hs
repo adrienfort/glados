@@ -182,8 +182,6 @@ compileSpec = do
 
 
 
-
-
 builtinsSpec :: Spec
 builtinsSpec = do
 
@@ -287,9 +285,21 @@ execSpec = do
             exec [Instruction {line = 0, command = "get", value = Just (AstSymbol "x")}] [] [] `shouldBe` (Right "x unknown variable")
 
 
+evalSpec :: Spec
+evalSpec = do
+    describe "DeleteEnv function" $ do
+        it "test 1" $ do
+            deleteEnv (AstSymbol "y") [("x", Right (AstInteger 1)), ("y", Right (AstInteger 2))] `shouldBe` [("x", Right (AstInteger 1))]
+        it "test 2" $ do
+            deleteEnv (AstSymbol "z") [("x", Right (AstInteger 1)), ("y", Right (AstInteger 2))] `shouldBe` [("x", Right (AstInteger 1)), ("y", Right (AstInteger 2))]
+        it "test 3" $ do
+            deleteEnv (AstSymbol "x") [("x", Right (AstInteger 1))] `shouldBe` []
+
+
 spec :: Spec
 spec = do
     execSpec
     jumpSpec
     compileSpec
     builtinsSpec
+    evalSpec
