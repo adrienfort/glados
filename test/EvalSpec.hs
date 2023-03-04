@@ -42,7 +42,7 @@ compileSpec :: Spec
 compileSpec = do
 
     describe "exec compile" $ do
-        it "compile success" $ do
+        it "(if #t 1 0)" $ do
             exec [
                 Instruction {line = 0, command = "push", value = Just (AstBoolean "#t")},
                 Instruction {line = 1, command = "jumpIfFalse", value = Just (AstInteger 4)},
@@ -51,10 +51,10 @@ compileSpec = do
                 Instruction {line = 4, command = "push", value = Just (AstInteger 0)},
                 Instruction {line = 5, command = "return", value = Nothing}
                 ] [] [] `shouldBe` (Left (AstInteger 1))
-        it "compile unexpected end" $ do
+        it "empty" $ do
             exec [] [("x", Right (AstInteger 1))] [] `shouldBe` (Right "unexpected end")
 
-        it "compile x undefined function" $ do
+        it "(x 1 2)" $ do
             exec [
                 Instruction {line = 0, command = "push", value = Just (AstInteger 1)},
                 Instruction {line = 1, command = "push", value = Just (AstInteger 2)},
@@ -62,29 +62,7 @@ compileSpec = do
                 Instruction {line = 3, command = "return", value = Nothing}
                 ] [] [] `shouldBe` (Right "x undefined function")
 
-        it "compile x undefined function" $ do
-            exec [
-                Instruction {line = 0, command = "push", value = Just (AstInteger 1)},
-                Instruction {line = 1, command = "push", value = Just (AstInteger 2)},
-                Instruction {line = 2, command = "push", value = Just (AstInteger 3)},
-                Instruction {line = 3, command = "push", value = Just (AstInteger 4)},
-                Instruction {line = 4, command = "push", value = Just (AstInteger 5)},
-                Instruction {line = 5, command = "push", value = Just (AstInteger 6)},
-                Instruction {line = 6, command = "push", value = Just (AstInteger 7)},
-                Instruction {line = 7, command = "push", value = Just (AstInteger 8)},
-                Instruction {line = 8, command = "push", value = Just (AstInteger 9)},
-                Instruction {line = 9, command = "push", value = Just (AstInteger 10)},
-                Instruction {line = 10, command = "push", value = Just (AstInteger 11)},
-                Instruction {line = 11, command = "push", value = Just (AstInteger 12)},
-                Instruction {line = 12, command = "push", value = Just (AstInteger 13)},
-                Instruction {line = 13, command = "push", value = Just (AstInteger 14)},
-                Instruction {line = 14, command = "push", value = Just (AstInteger 15)},
-                Instruction {line = 15, command = "push", value = Just (AstInteger 16)},
-                Instruction {line = 16, command = "call", value = Just (AstSymbol "x")},
-                Instruction {line = 17, command = "return", value = Nothing}
-                ] [] [] `shouldBe` (Right "x undefined function")
-
-        it "compile x undefined function" $ do
+        it "(x 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16)" $ do
             exec [
                 Instruction {line = 0, command = "push", value = Just (AstInteger 1)},
                 Instruction {line = 1, command = "push", value = Just (AstInteger 2)},
@@ -120,33 +98,7 @@ compileSpec = do
         it "compile unexpected end" $ do
             exec [] [("x", Right (AstInteger 5))] [] `shouldBe` (Right "unexpected end")
 
-
-        it "compile fact" $ do
-            exec [
-                Instruction {line = 0, command = "push", value = Just (AstInteger 10)},
-                Instruction {line = 1, command = "call", value = Just (AstSymbol "fact")},
-                Instruction {line = 2, command = "return", value = Nothing}
-                ] [
-                    ("fact", Left (["x"],
-                    [
-                        Instruction {line = 0, command = "get", value = Just (AstSymbol "x")},
-                        Instruction {line = 1, command = "push", value = Just (AstInteger 1)},
-                        Instruction {line = 2, command = "call", value = Just (AstSymbol "eq?")},
-                        Instruction {line = 3, command = "jumpIfFalse", value = Just (AstInteger 6)},
-                        Instruction {line = 4, command = "push", value = Just (AstInteger 1)},
-                        Instruction {line = 5, command = "return", value = Nothing},
-                        Instruction {line = 6, command = "get", value = Just (AstSymbol "x")}, -- pop *
-                        Instruction {line = 7, command = "get", value = Just (AstSymbol "x")}, -- pop -
-                        Instruction {line = 8, command = "push", value = Just (AstInteger 1)}, -- pop -
-                        Instruction {line = 9, command = "call", value = Just (AstSymbol "-")}, -- pop 2 | pop fact
-                        Instruction {line = 10, command = "call", value = Just (AstSymbol "fact")}, -- pop 1 | pop *
-                        Instruction {line = 11, command = "call", value = Just (AstSymbol "*")}, -- pop 2
-                        Instruction {line = 12, command = "return", value = Nothing}
-                    ])
-                )
-                ] [] `shouldBe` (Left (AstInteger 3628800))
-
-        it "compile fact" $ do
+        it "(define (fact x) (if (eq? x 1) 1 (* x (fact (- x 1))))) (fact 10)" $ do
             exec [
                 Instruction {line = 0, command = "push", value = Just (AstInteger 10)},
                 Instruction {line = 1, command = "call", value = Just (AstSymbol "fact")},

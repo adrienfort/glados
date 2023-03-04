@@ -8,7 +8,8 @@ module Lib (
         insertToTupleArray,
         addToTupleArray,
         searchTupleArray,
-        removeFromTupleArray
+        removeFromTupleArray,
+        addMultipleToTupleArray
     ) where
 
 data Ast = AstInteger Int
@@ -81,6 +82,10 @@ insertToTupleArray list str v = case lookup str list of
 
 addToTupleArray :: [(String, a)] -> String -> a -> [(String, a)]
 addToTupleArray list str a = (str, a) : list
+
+addMultipleToTupleArray :: [(String, a)] -> [String] -> [a] -> [(String, a)]
+addMultipleToTupleArray list [] [] = list
+addMultipleToTupleArray list (str:ns) (a:na) = addMultipleToTupleArray ((str, a) : list) ns na
 
 searchTupleArray :: [(String, a)] -> String -> Maybe a
 searchTupleArray list str = lookup str list
